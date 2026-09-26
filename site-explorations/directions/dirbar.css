@@ -1,0 +1,30 @@
+/* The direction switcher. Deliberately neutral so it doesn't colour any direction. */
+* { box-sizing: border-box; }
+.dirbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  padding: 9px 24px;
+  background: #fff; color: #222; border-bottom: 1px solid #ddd;
+  font: 500 12.5px/1.3 Inter, system-ui, sans-serif; letter-spacing: 0; text-transform: none;
+}
+.dirbar-k { color: #6b6b6b; font: 500 11.5px/1.3 Inter, system-ui, sans-serif; letter-spacing: 0.06em; text-transform: uppercase; }
+.dirbar-l { display: flex; gap: 4px; flex-wrap: wrap; }
+.dirbar-l a { display: inline-flex; gap: 7px; align-items: center; padding: 5px 10px; border-radius: 5px; color: #444; text-decoration: none; }
+.dirbar-l a span { font-size: 11px; color: #777; font-variant-numeric: tabular-nums; }
+.dirbar-l a:hover { background: #f1f1f1; }
+.dirbar-l a[aria-current='page'] { background: #1a1b1e; color: #fff; }
+.dirbar-l a[aria-current='page'] span { color: #bbb; }
+.dirbar-note { color: #666; flex: 1; min-width: 220px; }
+@media (max-width: 760px) { .dirbar-note { display: none; } .dirbar { padding: 8px 16px; } }
+
+.chooser { margin: 0; background: #f4f3ef; color: #1a1b1e; font-family: Inter, system-ui, sans-serif; }
+.chooser main { max-width: 1040px; margin: 0 auto; padding: 72px 24px; }
+.chooser h1 { font-size: 40px; letter-spacing: -0.02em; font-weight: 600; margin: 12px 0 12px; }
+.chooser .lede { color: #555; font-size: 16px; max-width: 60ch; margin: 0 0 40px; }
+.chs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.ch { display: block; padding: 22px 24px; background: #fff; border: 1px solid #ddd; border-radius: 8px; color: inherit; text-decoration: none; transition: border-color 150ms; }
+.ch:hover { border-color: #1a1b1e; }
+.ch span { font-size: 12px; color: #777; }
+.ch b { display: block; font-size: 19px; margin: 6px 0 6px; }
+.ch p { margin: 0; color: #555; font-size: 14.5px; line-height: 1.5; }
+@media (max-width: 760px) { .chs { grid-template-columns: 1fr; } }

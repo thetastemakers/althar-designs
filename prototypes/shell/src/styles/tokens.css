@@ -1,0 +1,86 @@
+:root {
+  /* Paper — warm paper and ink. Cobalt is Charrette and the work it runs,
+     violet is a person's call. Everything else is ink on paper. */
+  color-scheme: light;
+
+  /* ---- Surfaces ----------------------------------------------------------
+     On paper, raised means lighter: the page is a shade of cream and the
+     things on it (cards, sheets, the dock) are near-white.                  */
+  --n-0: #dcd8cd;   /* the desk, behind the window */
+  --n-1: #fcfbf8;   /* raised: cards, the dock, sheets */
+  --n-2: #f4f2ec;   /* the page: the primary work surface */
+  --n-3: #fbfaf7;   /* hover, inputs */
+  --n-4: #e7e3da;   /* pressed / selected */
+  --n-5: #d6d1c6;   /* strong fill, borders that must read */
+  --chrome: #ebe8e0; /* the window's own bars */
+
+  /* ---- Ink ---------------------------------------------------------------*/
+  --t-1: #141417;   /* primary */
+  --t-2: #45454c;   /* secondary */
+  --t-3: #6f6f77;   /* tertiary — metadata */
+  --t-4: #9a99a0;   /* quaternary — disabled, faint scaffolding */
+
+  /* ---- Lines -------------------------------------------------------------
+     Almost everything is separated by the faintest possible line. A visible
+     border must earn itself.                                                */
+  --line: rgba(20, 20, 28, 0.07);
+  --line-2: rgba(20, 20, 28, 0.11);
+  --line-3: rgba(20, 20, 28, 0.18);
+
+  /* ---- Signal ------------------------------------------------------------
+     Violet means exactly one thing: this requires a person.                 */
+  --signal: #7a3ff0;
+  --signal-bright: #6a2fd6;
+  --signal-dim: rgba(122, 63, 240, 0.1);
+  --signal-line: rgba(122, 63, 240, 0.32);
+  --signal-hover: rgba(122, 63, 240, 0.16);
+  --signal-paper: #f6f1ff;  /* a sheet that is asking you something */
+  --on-signal: #ffffff;
+
+  /* ---- Cobalt ------------------------------------------------------------
+     Charrette's own colour: the work it is running right now.               */
+  --live: #2b3bff;
+  --live-dim: rgba(43, 59, 255, 0.1);
+  --danger: #c4402f;
+  --ok: #2e8c46;
+
+  /* ---- Derived materials ------------------------------------------------*/
+  --n-1-clear: rgba(252, 251, 248, 0);   /* --n-1 at zero alpha, for fades */
+  --n-2-clear: rgba(244, 242, 236, 0);
+  --n-5-hover: #cbc5b8;
+  --track: rgba(20, 20, 28, 0.08);        /* progress, empty */
+  --track-done: rgba(20, 20, 28, 0.32);
+  --sunk: rgba(20, 20, 28, 0.04);         /* a chosen option, pressed in */
+  --wire: #d2cdc1;                        /* graph edges */
+  --wire-live: #a8a295;
+  --add: rgba(46, 140, 70, 0.1);          /* diff lines */
+  --del: rgba(196, 64, 47, 0.06);
+  --shadow: rgba(60, 50, 30, 0.14);
+  --lift: 0 1px 2px rgba(60, 50, 30, 0.05);
+  --lift-2: 0 1px 2px rgba(60, 50, 30, 0.06), 0 4px 10px -6px rgba(60, 50, 30, 0.12);
+  /* shadows are neutral and short: paper lifting off paper, never a glow */
+  --traffic: #d0cbc0;
+
+  /* ---- Radius ------------------------------------------------------------*/
+  --r-sm: 4px;
+  --r: 6px;
+  --r-lg: 10px;
+
+  /* ---- Type --------------------------------------------------------------*/
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-display: var(--font);   /* titles: the task, the dock, the thread */
+  --font-prose: var(--font);     /* what the coordinator and you write */
+  --font-label: var(--mono);     /* eyebrows */
+
+  /* ---- Scale and air -----------------------------------------------------*/
+  --scale: 1.04;     /* the whole window, as one zoom */
+  --sp: 1.15;        /* air inside the working surfaces */
+  --measure: 700px;  /* how wide the conversation and the task read */
+
+  /* ---- Motion ------------------------------------------------------------*/
+  --ease: cubic-bezier(0.22, 0.61, 0.24, 1);
+  --fast: 110ms;
+  --base: 180ms;
+  --slow: 260ms;
+}

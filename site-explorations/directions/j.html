@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Charrette · Direction J</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="dirbar.css" />
+<link rel="stylesheet" href="j.css" />
+</head>
+<body class="dir-j">
+
+<nav class="dirbar" aria-label="Design directions">
+  <span class="dirbar-k">Design direction</span>
+  <div class="dirbar-l"><a href="b.html"><span>B</span>Swiss signal</a><a href="e.html"><span>E</span>Serif signal</a><a href="g.html"><span>G</span>Night signal</a><a href="i.html"><span>I</span>Klein</a><a href="j.html" aria-current="page"><span>J</span>Bento</a><a href="k.html"><span>K</span>Memo</a><a href="l.html"><span>L</span>Deck</a></div>
+  <span class="dirbar-note">Swiss type, but every section is a grid of coloured tiles. Modular and visual.</span>
+</nav>
+
+<header class="mast">
+  <a class="brand" href="#">Charrette</a>
+  <nav class="pages"><a href="#" aria-current="page">Brief</a><a href="#">Research note</a></nav>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="kicker">Open-source infrastructure for software engineering with AI agents</p>
+    <h1>Agents come and go. The project stays.</h1>
+    <div class="hero-row">
+      <p class="dek">Charrette is a home for your project’s memory, and a coordinator that runs agents against it. Any agent, any model, any subscription, on your servers.</p>
+      <aside class="prop"><b>The proposition</b><p>The agents will keep changing. Your project should not have to.</p></aside>
+    </div>
+  </div>
+</section>
+
+<section class="abstract">
+  <div class="wrap">
+    <p>Every major AI coding company is building a project layer, and each one ties it to the agent it sells. <strong>Charrette keeps project knowledge open and independent,</strong> and uses it to run work across whichever agents are best this month.</p>
+  </div>
+</section>
+
+<section class="sec band-1">
+  <div class="wrap grid">
+    <div class="sec-h"><span class="num">01</span><span class="lab">The problem</span></div>
+    <div class="sec-b">
+      <h2>Agents can now do real engineering work. The way we run them hasn’t caught up.</h2>
+      <div class="cards">
+        <article class="card">
+          <p class="card-k">Problem A</p>
+          <h3>The project has no memory of its own.</h3>
+          <p>What a team knows is spread across instruction files, chat histories and people’s heads. Switch tools and it has to be rebuilt.</p>
+          <ul><li>Every new session starts from a re-typed brief</li><li>Decisions live in one vendor’s history</li><li>Nobody can tell a rule from a stale guess</li></ul>
+        </article>
+        <article class="card">
+          <p class="card-k">Problem B</p>
+          <h3>The developer is the message bus.</h3>
+          <p>An agent finishes. Someone reads the diff, briefs a reviewer, carries the findings to a fixer, starts the tests and decides what’s next.</p>
+          <ul><li>Parallel agents create parallel queues</li><li>Every hand-off interrupts real work</li><li>Findings don’t change the plan on their own</li></ul>
+        </article>
+      </div>
+      <p class="take">Vendors have little reason to make project memory portable to a competitor. <strong>So it has to live in an independent layer</strong>, one that any agent can be briefed from.</p>
+    </div>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="wrap">
+    <p class="stats-k">One real task, run end to end in the prototype</p>
+    <div class="stats-row">
+      <div><b>10</b><span>steps, none planned in advance</span></div>
+      <div><b>4</b><span>added because a result demanded them</span></div>
+      <div><b>3</b><span>model families, one on your own hardware</span></div>
+      <div class="you"><b>1</b><span>question that needed a person</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec band-2">
+  <div class="wrap grid">
+    <div class="sec-h"><span class="num">02</span><span class="lab">The market</span></div>
+    <div class="sec-b">
+      <h2>Everyone is building this layer, each for their own agent.</h2>
+      <p class="body">For each vendor that’s rational: memory that moves to a competitor stops keeping customers. For the team it’s the wrong trade, because the best coding model has changed hands repeatedly in eighteen months.</p>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th></th><th>Which agent</th><th>Which models</th><th>What you pay for</th><th>Where memory lives</th></tr></thead><tbody><tr><td>Devin</td><td class="lock">Devin</td><td class="lock">Cognition’s choice</td><td class="lock">Their compute</td><td class="lock">Inside Devin</td></tr><tr><td>GitHub Copilot</td><td class="lock">Copilot</td><td class="lock">GitHub’s catalogue</td><td class="lock">Seats and requests</td><td class="lock">Inside GitHub</td></tr><tr><td>Cursor</td><td class="lock">Cursor’s agents</td><td class="lock">Cursor’s catalogue</td><td class="lock">Seats and usage</td><td class="lock">Inside Cursor</td></tr><tr><td>Claude Code, Codex</td><td class="lock">The lab’s own</td><td class="lock">The lab’s own</td><td class="free">Your subscription</td><td class="lock">Each lab’s own files</td></tr><tr class="us"><td>Charrette</td><td class="free">Any</td><td class="free">Any, including self-hosted</td><td class="free">Your subscriptions</td><td class="free">With the project, open format</td></tr></tbody></table></div>
+      <p class="key"><span class="k-lock"></span>Decided by the vendor <span class="k-free"></span>Decided by you</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec band-3">
+  <div class="wrap grid">
+    <div class="sec-h"><span class="num">03</span><span class="lab">Orchestration</span></div>
+    <div class="sec-b">
+      <h2>Launching a sub-agent is delegation, not orchestration.</h2>
+      <ol class="rungs"><li><span class="r-n">1</span><b>Delegation</b><p>An agent starts a sub-agent and waits for text back.</p><span class="r-w">Most tools</span></li><li><span class="r-n">2</span><b>Parallel agents</b><p>Many sessions at once. You carry context between them.</p><span class="r-w">Most tools</span></li><li><span class="r-n">3</span><b>Fixed pipeline</b><p>The same steps every time, whether needed or not.</p><span class="r-w">Workflow features</span></li><li class="us"><span class="r-n">4</span><b>Graph from evidence</b><p>Each result decides the next step. A finding adds a repair; a sensitive file adds an audit.</p><span class="r-w">Charrette</span></li><li class="us"><span class="r-n">5</span><b>Supervision</b><p>The graph, plus routing across labs, an attention boundary, and memory the next task inherits.</p><span class="r-w">Charrette</span></li></ol>
+    </div>
+  </div>
+</section>
+
+<section class="closer">
+  <div class="wrap">
+    <p class="closer-q">The project persists. The coordinator understands. Agents come and go.</p>
+    <a class="next" href="#"><span>Next</span>Read the research note: The missing project layer <i>→</i></a>
+  </div>
+</section>
+
+<script>
+document.addEventListener('keydown', (e) => {
+  const k = ['1','2','3','4','5','6','7'].indexOf(e.key); if (k < 0 || e.metaKey || e.ctrlKey) return
+  location.href = 'begijkl'[k] + '.html'
+})
+</script>
+</body>
+</html>

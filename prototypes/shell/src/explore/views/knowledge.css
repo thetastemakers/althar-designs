@@ -1,0 +1,342 @@
+/* The knowledge directions.
+
+   One rule governs this whole file: there is no brass in it. Nothing on
+   these screens has stopped any work, and the single saturated colour in the
+   product means exactly that and nothing else. A claim that is disputed is
+   marked by typography — a dotted underline, a struck line, a hairline
+   bracket — which is louder inside a sentence than a colour would be, and
+   costs the signal nothing. */
+
+.kv {
+  flex: 1; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column;
+  background: var(--n-2);
+}
+.kv-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+
+/* ---- Shared vocabulary --------------------------------------------------*/
+.kv-standing {
+  flex: none; padding: 1px 7px; border-radius: 99px;
+  font-size: 10.5px; line-height: 15px; white-space: nowrap;
+}
+.kv-standing.is-canonical { background: var(--n-5); color: var(--t-2); }
+.kv-standing.is-episodic  { border: 1px solid var(--line-2); color: var(--t-3); }
+.kv-standing.is-proposed  { border: 1px dashed var(--line-3); color: var(--t-3); }
+.kv-standing.is-retired   { border: 1px solid var(--line); color: var(--t-4); }
+
+.kv-src { color: var(--t-4); }
+.kv-src-ref { color: var(--t-3); }
+.kv-reach { color: var(--t-3); font-variant-numeric: tabular-nums; }
+.kv-reach.is-stale, .kv-cell.is-stale { color: var(--t-4); }
+
+/* Disputed: questioned, not withdrawn. */
+.is-disputed {
+  text-decoration: underline dotted var(--t-3);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.kv-dispute {
+  position: relative;
+  margin: 10px 0 0; padding-left: 15px;
+  font-size: 12.5px; line-height: 1.6; color: var(--t-3);
+}
+.kv-dispute-mark {
+  position: absolute; left: 0; top: 6px;
+  width: 6px; height: 6px;
+  border: 1px solid var(--t-3);
+  transform: rotate(45deg);
+}
+.kv-dispute .mono { color: var(--t-2); }
+
+.kv-ev, .kv-supplied { margin-bottom: 18px; }
+.kv-ev .eyebrow, .kv-supplied .eyebrow { display: block; margin-bottom: 7px; }
+.kv-ev p { margin: 0 0 5px; font-size: 12px; line-height: 1.55; color: var(--t-3); }
+.kv-refs { display: flex; flex-direction: column; gap: 5px; }
+.kv-ref { display: flex; gap: 8px; font-size: 12px; color: var(--t-3); }
+.kv-ref .mono { color: var(--t-4); flex: none; }
+.kv-ref.is-more { color: var(--t-4); }
+.kv-none { margin: 0; font-size: 12px; line-height: 1.55; color: var(--t-4); }
+
+/* ---- Answering ----------------------------------------------------------*/
+.kv-answer { margin-top: 14px; }
+.kv-opts { display: flex; flex-direction: column; gap: 1px; }
+.kv-opt {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 11px; border-radius: var(--r);
+  border: 1px solid transparent;
+  transition: background var(--fast) var(--ease), border-color var(--fast) var(--ease);
+}
+.kv-opt:hover { background: var(--n-3); }
+.kv-opt.is-on { background: var(--n-3); border-color: var(--line-2); }
+.kv-opt-mark {
+  flex: none; margin-top: 3px;
+  width: 11px; height: 11px; border-radius: 99px;
+  border: 1px solid var(--n-5);
+  transition: border-color var(--fast) var(--ease), box-shadow var(--fast) var(--ease);
+}
+.kv-opt.is-on .kv-opt-mark { border-color: var(--t-2); box-shadow: inset 0 0 0 2.5px var(--n-3), inset 0 0 0 9px var(--t-2); }
+.kv-opt-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.kv-opt-label { font-size: 12.5px; color: var(--t-1); }
+.kv-opt-note { font-size: 12px; line-height: 1.5; color: var(--t-4); }
+
+.kv-record {
+  margin-top: 12px; height: 28px; padding: 0 14px;
+  border-radius: var(--r); border: 1px solid var(--line-2);
+  background: var(--n-4); color: var(--t-1); font-size: 12px;
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.kv-record:hover:not(:disabled) { background: var(--n-5); }
+.kv-record:disabled { background: none; color: var(--t-4); border-color: var(--line); }
+
+.kv-answer.is-recorded {
+  padding: 12px 14px; border-radius: var(--r);
+  border: 1px solid var(--line); background: var(--n-1);
+}
+.kv-answer-after { margin: 6px 0 0; font-size: 12.5px; line-height: 1.6; color: var(--t-2); }
+
+/* ---- Register -----------------------------------------------------------*/
+.kv-head { flex: none; padding: 26px 0 0; border-bottom: 1px solid var(--line); }
+.kv-head > * { max-width: 1240px; margin-left: auto; margin-right: auto; padding-left: 30px; padding-right: 30px; }
+.kv-head h1 { margin: 0; font-size: 18px; font-weight: 550; letter-spacing: -0.015em; color: var(--t-1); }
+.kv-head-line { margin: 8px 0 0; max-width: 72ch; font-size: 13px; line-height: 1.6; color: var(--t-3); }
+
+.kv-filters { display: flex; gap: 2px; margin: 16px 0 0; }
+.kv-filter {
+  display: flex; align-items: center; gap: 7px;
+  height: 27px; padding: 0 11px;
+  border-radius: var(--r) var(--r) 0 0;
+  font-size: 12px; color: var(--t-3);
+  border-bottom: 1px solid transparent;
+  transition: color var(--fast) var(--ease), border-color var(--fast) var(--ease);
+}
+.kv-filter:hover { color: var(--t-2); }
+.kv-filter.is-on { color: var(--t-1); border-bottom-color: var(--t-2); }
+.kv-filter-n { font-size: 10.5px; color: var(--t-4); font-variant-numeric: tabular-nums; }
+
+.kv-table { max-width: 1240px; margin: 0 auto; padding: 0 30px 40px; }
+.kv-tr {
+  display: grid; width: 100%;
+  grid-template-columns: minmax(0, 1fr) 106px 216px 76px 126px;
+  gap: 16px; align-items: baseline;
+  padding: 9px 8px 9px 0;
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--line);
+  transition: background var(--fast) var(--ease);
+}
+.kv-tr.is-head {
+  position: sticky; top: 0; z-index: 2;
+  padding-top: 14px; background: var(--n-2);
+  font-size: 10.5px; font-weight: 550; letter-spacing: 0.07em;
+  text-transform: uppercase; color: var(--t-4);
+  border-bottom-color: var(--line-2);
+}
+.kv-row .kv-tr:hover { background: var(--n-3); }
+.kv-row.is-open .kv-tr { background: var(--n-3); border-bottom-color: transparent; }
+
+.kv-group { display: flex; align-items: baseline; gap: 12px; padding: 22px 0 8px; }
+.kv-group-note { font-size: 11.5px; color: var(--t-4); }
+
+.kv-claim-cell { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.kv-caret { flex: none; color: var(--t-4); transition: transform var(--fast) var(--ease); align-self: center; }
+.kv-row.is-open .kv-caret, .kv-body-toggle.is-on .kv-caret { transform: rotate(90deg); }
+.kv-claim-t { color: var(--t-1); line-height: 1.45; }
+.kv-cell { color: var(--t-3); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.kv-expand {
+  display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 36px;
+  padding: 4px 8px 22px 22px;
+  background: var(--n-3);
+  border-bottom: 1px solid var(--line);
+  animation: kv-in var(--fast) var(--ease);
+}
+@keyframes kv-in { from { opacity: 0; } to { opacity: 1; } }
+.kv-body { margin: 0; font-size: 13px; line-height: 1.65; color: var(--t-2); max-width: 62ch; }
+
+.kv-inline-open {
+  margin-top: 18px; padding: 14px 16px;
+  border: 1px solid var(--line-2); border-radius: var(--r);
+  background: var(--n-2);
+}
+.kv-inline-t { margin: 6px 0 0; font-size: 13px; color: var(--t-1); }
+
+/* ---- Dossier ------------------------------------------------------------*/
+.kv-doc { max-width: 700px; margin: 0 auto; padding: 44px 32px 64px; }
+.kv-doc-head { padding-bottom: 26px; border-bottom: 1px solid var(--line); }
+.kv-doc-head h1 { margin: 10px 0 0; font-size: 22px; font-weight: 550; letter-spacing: -0.02em; color: var(--t-1); }
+.kv-doc-lede { margin: 12px 0 0; font-size: 13.5px; line-height: 1.7; color: var(--t-3); }
+
+.kv-sec { padding-top: 34px; }
+.kv-sec-h { margin: 0; font-size: 14px; font-weight: 550; color: var(--t-1); }
+.kv-sec-lede { margin: 7px 0 0; font-size: 12.5px; line-height: 1.6; color: var(--t-3); max-width: 60ch; }
+.kv-sec.is-quiet .kv-sec-h { color: var(--t-3); }
+
+.kv-para { padding: 22px 0 0; }
+.kv-claim-line { margin: 0; font-size: 15px; line-height: 1.55; font-weight: 500; color: var(--t-1); letter-spacing: -0.01em; }
+.kv-claim-body { margin: 8px 0 0; font-size: 13.5px; line-height: 1.7; color: var(--t-2); }
+/* A disputed claim is marked where it is read, in the sentence itself — and
+   only in the sentence. The generic .is-disputed rule is inherited by every
+   descendant, so the paragraph wrapper must not carry it. */
+.kv-para.has-dispute { padding-left: 16px; margin-left: -17px; border-left: 1px solid var(--line-3); }
+.kv-para.has-dispute .kv-claim-line {
+  text-decoration: underline dotted var(--t-3);
+  text-underline-offset: 5px; text-decoration-thickness: 1px;
+}
+
+.kv-gutter { display: flex; flex-wrap: wrap; gap: 0 14px; margin-top: 9px; font-size: 11.5px; color: var(--t-4); }
+.kv-gutter .mono { color: var(--t-3); }
+
+.kv-minor { padding: 14px 0 0; }
+.kv-minor-t { margin: 0; font-size: 13px; line-height: 1.5; color: var(--t-2); }
+.kv-minor-t.is-gone { color: var(--t-4); text-decoration: line-through; text-decoration-color: var(--t-4); }
+.kv-minor-m { margin: 3px 0 0; font-size: 11.5px; color: var(--t-4); }
+.kv-minor-m .mono { color: var(--t-3); }
+
+.kv-doc-foot { margin: 44px 0 0; padding-top: 18px; border-top: 1px solid var(--line); font-size: 12px; color: var(--t-4); }
+
+/* ---- Queue --------------------------------------------------------------*/
+.kv-q { max-width: 680px; margin: 0 auto; padding: 40px 32px 60px; }
+.kv-q-head h1 { margin: 0; font-size: 19px; font-weight: 550; letter-spacing: -0.015em; color: var(--t-1); }
+.kv-q-lede { margin: 9px 0 0; font-size: 13.5px; line-height: 1.68; color: var(--t-3); }
+
+.kv-item {
+  margin-top: 22px; padding: 18px 20px;
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  background: var(--n-1);
+  transition: opacity var(--base) var(--ease);
+}
+.kv-item.is-done { opacity: 0.55; }
+.kv-item-head { display: flex; align-items: baseline; gap: 10px; }
+.kv-item-sort { font-size: 11px; font-weight: 550; letter-spacing: 0.06em; text-transform: uppercase; color: var(--t-3); }
+.kv-item-at { margin-left: auto; font-size: 11.5px; color: var(--t-4); }
+.kv-item-t { margin: 8px 0 0; font-size: 14.5px; font-weight: 550; letter-spacing: -0.012em; color: var(--t-1); }
+.kv-item-detail { margin: 8px 0 0; font-size: 13px; line-height: 1.65; color: var(--t-2); }
+
+.kv-claims { margin: 14px 0 0; display: flex; flex-direction: column; gap: 1px; }
+.kv-crow {
+  display: grid; grid-template-columns: 78px minmax(0, 1fr);
+  gap: 10px; align-items: baseline;
+  padding: 9px 11px; border-radius: var(--r);
+  background: var(--n-2);
+}
+.kv-crow > .kv-standing { justify-self: start; }
+.kv-crow-t { font-size: 12.5px; line-height: 1.45; color: var(--t-1); }
+.kv-crow-m { grid-column: 2; display: flex; flex-wrap: wrap; gap: 0 8px; font-size: 11.5px; color: var(--t-4); }
+.kv-crow-task { color: var(--t-4); }
+
+/* The line that does the work brass does on a task view. It has to carry
+   the whole consequence, because nothing here is stopped. */
+.kv-item-cost {
+  margin: 14px 0 0; padding-left: 13px;
+  border-left: 1px solid var(--line-3);
+  font-size: 12.5px; line-height: 1.65; color: var(--t-3);
+}
+
+.kv-body-toggle {
+  display: flex; align-items: center; gap: 9px;
+  margin-top: 34px; padding: 11px 0;
+  width: 100%; border-top: 1px solid var(--line);
+  font-size: 12.5px; color: var(--t-4);
+  transition: color var(--fast) var(--ease);
+}
+.kv-body-toggle:hover { color: var(--t-2); }
+.kv-body-list { animation: kv-in var(--fast) var(--ease); }
+.kv-brow {
+  display: flex; align-items: baseline; gap: 14px;
+  padding: 8px 0; border-bottom: 1px solid var(--line);
+}
+.kv-brow-t { flex: 1; min-width: 0; font-size: 12.5px; color: var(--t-2); }
+.kv-brow-m { flex: none; display: flex; align-items: center; gap: 10px; font-size: 11.5px; }
+
+/* ---- Trace --------------------------------------------------------------*/
+.kv.is-split { flex-direction: row; }
+.kv-list {
+  flex: none; width: 306px; overflow-y: auto;
+  padding: 10px 10px 30px;
+  border-right: 1px solid var(--line);
+  background: var(--n-1);
+}
+.kv-list-head { padding: 16px 8px 6px; display: block; }
+.kv-lrow {
+  display: flex; flex-direction: column; gap: 3px;
+  width: 100%; padding: 8px 9px; border-radius: var(--r);
+  transition: background var(--fast) var(--ease);
+}
+.kv-lrow:hover { background: var(--n-2); }
+.kv-lrow.is-on { background: var(--n-4); }
+.kv-lrow-t { font-size: 12.5px; line-height: 1.42; color: var(--t-2); }
+.kv-lrow.is-on .kv-lrow-t { color: var(--t-1); }
+.kv-lrow-m { font-size: 11px; color: var(--t-4); }
+
+.kv-spine-wrap {
+  flex: 1; min-width: 0; display: flex; flex-direction: column;
+  animation: kv-in var(--base) var(--ease);
+}
+.kv-spine-head { flex: none; padding: 30px 34px 22px; border-bottom: 1px solid var(--line); }
+.kv-spine-top { display: flex; align-items: center; gap: 10px; }
+.kv-spine-class { font-size: 11.5px; color: var(--t-4); }
+.kv-spine-head h1 { margin: 12px 0 0; font-size: 19px; font-weight: 550; letter-spacing: -0.016em; line-height: 1.4; color: var(--t-1); max-width: 30ch; }
+.kv-spine-body { margin: 11px 0 0; max-width: 62ch; font-size: 13px; line-height: 1.68; color: var(--t-2); }
+
+.kv-spine-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 26px 34px 48px; }
+.kv-spine { list-style: none; margin: 0; padding: 0; }
+.kv-node { position: relative; padding: 0 0 22px 24px; }
+.kv-node::before {
+  content: ''; position: absolute; left: 4.5px; top: 12px; bottom: -2px;
+  width: 1px; background: var(--line-3);
+}
+.kv-node:last-child::before { display: none; }
+.kv-node-mark {
+  position: absolute; left: 0; top: 4px;
+  width: 10px; height: 10px; border-radius: 99px;
+  border: 1px solid var(--n-5); background: var(--n-2);
+}
+.kv-node.is-written .kv-node-mark { background: var(--t-3); border-color: var(--t-3); }
+.kv-node.is-dispute .kv-node-mark { border-radius: 0; transform: rotate(45deg); border-color: var(--t-2); width: 9px; height: 9px; left: 0.5px; }
+.kv-node.is-now .kv-node-mark { border-color: var(--t-2); box-shadow: inset 0 0 0 2px var(--n-2), inset 0 0 0 9px var(--t-2); }
+.kv-node.is-none .kv-node-mark { border-style: dashed; }
+
+.kv-node-head { display: block; font-size: 12px; font-weight: 550; color: var(--t-2); }
+.kv-node-text { margin-top: 4px; font-size: 12.5px; line-height: 1.62; color: var(--t-3); max-width: 58ch; }
+.kv-node-text .mono { color: var(--t-2); }
+.kv-node-note { margin-left: 8px; color: var(--t-4); }
+.kv-node-ev { margin: 8px 0 0; padding-left: 15px; }
+.kv-node-ev li { font-size: 12px; line-height: 1.6; color: var(--t-4); }
+
+/* ---- Narrow: the sidecar --------------------------------------------------
+   At dock width the table cannot be a table and the split cannot be a split.
+   Both collapse to the same thing — a claim, then its numbers underneath.
+   The container is the placement wrapper, not .kv: a direction has to be able
+   to change its own outermost shape, and an element cannot query itself. */
+@container (max-width: 560px) {
+  .kv-head { padding: 20px 16px 0; }
+  .kv-head h1 { font-size: 15px; }
+  .kv-filters { flex-wrap: wrap; }
+  .kv-table { padding: 0 16px 30px; }
+  /* A dock has no room for columns, and provenance is the first thing to go:
+     what is left is the claim, then just enough to judge it by. */
+  .kv-tr { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 0; padding: 11px 0; }
+  .kv-tr.is-head { display: none; }
+  .kv-claim-cell { flex: 1 0 100%; }
+  .kv-claim-t { white-space: normal; }
+  .kv-cell { white-space: normal; font-size: 11.5px; color: var(--t-4); }
+  .kv-cell:nth-child(3) { display: none; }
+  .kv-cell + .kv-cell::before { content: '·'; margin: 0 7px; color: var(--n-5); }
+  .kv-expand { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 4px 0 18px 18px; }
+
+  .kv-doc { padding: 26px 16px 44px; }
+  .kv-doc-head h1 { font-size: 17px; }
+  .kv-claim-line { font-size: 13.5px; }
+
+  .kv-q { padding: 24px 16px 44px; }
+  .kv-q-head h1 { font-size: 16px; }
+  .kv-item { padding: 15px 15px; }
+  .kv-crow { grid-template-columns: minmax(0, 1fr); gap: 5px; }
+  .kv-crow-m { grid-column: 1; }
+
+  .kv.is-split { flex-direction: column; }
+  .kv-list { width: auto; max-height: 176px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .kv-spine-head { padding: 18px 16px 16px; }
+  .kv-spine-head h1 { font-size: 15px; }
+  .kv-spine-scroll { padding: 18px 16px 34px; }
+}

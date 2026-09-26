@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Charrette · Paper</title>
+<style>
+  :root { --bg: #0d0d0f; --bar: #151517; --line: #2a2a2f; --t1: #ececef; --t2: #a3a3ab; --t3: #6f6f78; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--t1); font: 13px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
+  body { display: flex; flex-direction: column; }
+  header { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 10px 16px; background: var(--bar); border-bottom: 1px solid var(--line); }
+  #screens { flex-wrap: wrap; }
+  .group { display: flex; gap: 2px; padding: 3px; background: #0d0d0f; border: 1px solid var(--line); border-radius: 8px; }
+  button { font: inherit; color: var(--t2); background: none; border: 0; padding: 6px 11px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+  button:hover { color: var(--t1); }
+  button[aria-pressed='true'] { background: #f2f2f4; color: #111; }
+  button kbd { font: 10px ui-monospace, monospace; color: var(--t3); margin-left: 6px; }
+  button[aria-pressed='true'] kbd { color: #777; }
+  .note { flex: 1 1 320px; color: var(--t2); min-width: 0; }
+  .note b { color: var(--t1); font-weight: 600; margin-right: 6px; }
+  a.live { color: var(--t1); text-decoration: none; border: 1px solid var(--line); padding: 6px 11px; border-radius: 6px; white-space: nowrap; }
+  a.live:hover { background: #222226; }
+  main { flex: 1; min-height: 0; overflow: auto; display: grid; gap: 12px; padding: 12px; }
+  main.fit { place-items: center; }
+  main.two { grid-template-columns: 1fr 1fr; }
+  figure { margin: 0; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center; }
+  main.fit figure { width: 100%; height: 100%; }
+  figcaption { flex: none; color: var(--t3); font-size: 12px; }
+  img { display: block; border-radius: 8px; border: 1px solid var(--line); cursor: zoom-in; }
+  main.fit img { max-width: 100%; max-height: 100%; min-height: 0; object-fit: contain; }
+  main:not(.fit) img { width: 1440px; max-width: none; cursor: zoom-out; }
+  main.two:not(.fit) img { width: auto; max-width: 100%; }
+  .help { color: var(--t3); font-size: 11.5px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="group" id="looks"></div>
+  <div class="group" id="screens"></div>
+  <div class="group">
+    <button id="zoom" aria-pressed="false" title="Actual size">1:1<kbd>F</kbd></button>
+  </div>
+  <p class="note" id="note"></p>
+  <a class="live" id="live" target="_blank" rel="noopener">Open live ↗</a>
+</header>
+<main id="stage" class="fit"></main>
+<script>
+  const LOOKS = [
+    ['mono', 'Paper', 'Model marks in the ink of the text around them.'],
+  ]
+  const SCREENS = [
+    ['talk-top', 'Conversation'], ['talk-bottom', 'Latest'], ['all', 'Both'], ['board', 'Board'],
+    ['board-decision-dock', 'Decision'], ['board-review', 'Review'], ['next', 'Up next'], ['knowledge-room', 'Knowledge, full size'], ['knowledge', 'Knowledge'], ['artifacts', 'Artifacts'],
+    ['switcher', 'Projects'], ['task-top', 'Task'], ['task-outputs', 'Outputs'], ['task-ready', 'Ready'], ['task-merged', 'Merged'], ['task-graph', 'Graph'],
+    ['task-diff', 'Diff'], ['task-session', 'Session'], ['task-question', 'Question'],
+    ['model-picker', 'Model picker'], ['model-browser', 'All models'], ['context', 'Context'], ['project-menu', 'Project menu'],
+  ]
+  const LIVE = 'http://localhost:5273/'
+
+  const q = new URLSearchParams(location.hash.slice(1))
+  let look = LOOKS.findIndex(([id]) => id === q.get('look')); if (look < 0) look = 0
+  let screen = SCREENS.findIndex(([id]) => id === q.get('screen')); if (screen < 0) screen = 0
+  let compare = false, zoom = false
+
+  const $ = (id) => document.getElementById(id)
+  const src = (l, s) => `shots/${LOOKS[l][0]}-${SCREENS[s][0]}.png`
+
+  LOOKS.forEach(([, name], i) => {
+    const b = document.createElement('button'); b.innerHTML = `${name}<kbd>${i + 1}</kbd>`; b.onclick = () => { look = i; draw() }; $('looks').append(b)
+  })
+  SCREENS.forEach(([, name], i) => {
+    const b = document.createElement('button'); b.textContent = name; b.onclick = () => { screen = i; draw() }; $('screens').append(b)
+  })
+  $('zoom').onclick = () => { zoom = !zoom; draw() }
+
+  function fig(l) {
+    const f = document.createElement('figure')
+    const img = new Image(); img.src = src(l, screen); img.alt = `${LOOKS[l][1]}, ${SCREENS[screen][1]}`
+    img.onclick = () => { zoom = !zoom; draw() }
+    const c = document.createElement('figcaption'); c.textContent = `${LOOKS[l][1]} · ${SCREENS[screen][1]}`
+    f.append(img, c); return f
+  }
+
+  let draw = function () {
+    ;[...$('looks').children].forEach((b, i) => b.setAttribute('aria-pressed', i === look))
+    ;[...$('screens').children].forEach((b, i) => b.setAttribute('aria-pressed', i === screen))
+    $('zoom').setAttribute('aria-pressed', zoom)
+    $('note').innerHTML = `<b>${LOOKS[look][1]}</b>${LOOKS[look][2]}`
+    $('live').href = `${LIVE}?marks=${LOOKS[look][0]}`
+    const two = compare
+    $('stage').className = [zoom ? '' : 'fit', two ? 'two' : ''].join(' ')
+    $('stage').replaceChildren(...(two ? [fig(0), fig(1)] : [fig(look)]))
+    history.replaceState(null, '', `#look=${LOOKS[look][0]}&screen=${SCREENS[screen][0]}${compare ? '&compare' : ''}`)
+  }
+
+  addEventListener('keydown', (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return
+    const k = e.key.toLowerCase()
+    if (k >= '1' && k <= String(LOOKS.length)) look = Number(k) - 1
+    else if (k === 'arrowright') look = (look + 1) % LOOKS.length
+    else if (k === 'arrowleft') look = (look + LOOKS.length - 1) % LOOKS.length
+    else if (k === 'arrowdown') screen = (screen + 1) % SCREENS.length
+    else if (k === 'arrowup') screen = (screen + SCREENS.length - 1) % SCREENS.length
+
+    else if (k === 'f') zoom = !zoom
+    else return
+    e.preventDefault(); draw()
+  })
+
+  /* the neighbours up front, so flipping is instant */
+  const warm = () => { LOOKS.forEach((_, l) => { new Image().src = src(l, screen) }); SCREENS.forEach((_, s) => { new Image().src = src(look, s) }) }
+  const drawn = draw; draw = () => { drawn(); warm() }
+  draw()
+</script>
+</body>
+</html>

@@ -1,0 +1,517 @@
+/* Direction 4 — Standup.
+   Two permanent surfaces: the conversation you are in with the coordinator,
+   and the board it keeps on your behalf. Nothing else is chrome. */
+
+.stu {
+  position: relative;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 436px minmax(0, 1fr);
+  grid-template-rows: 40px minmax(0, 1fr);
+  grid-template-areas:
+    'chrome chrome'
+    'talk   board';
+  background: var(--n-2);
+  overflow: hidden;
+}
+
+/* ---- Chrome -------------------------------------------------------------*/
+.stu-chrome {
+  grid-area: chrome;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 12px 0 14px;
+  background: var(--n-1);
+  border-bottom: 1px solid var(--line);
+  user-select: none;
+}
+
+.stu-switch-wrap { position: relative; margin-left: 4px; }
+.stu-switch {
+  display: flex; align-items: center; gap: 6px;
+  height: 24px; padding: 0 7px 0 8px;
+  border-radius: var(--r);
+  color: var(--t-1);
+  font-size: 13px; font-weight: 550;
+  transition: background var(--fast) var(--ease);
+}
+.stu-switch:hover, .stu-switch.is-open { background: var(--n-3); }
+.stu-switch-caret { color: var(--t-4); }
+
+.stu-pop {
+  position: absolute; top: 30px; left: -2px; z-index: 40;
+  width: 300px; padding: 5px;
+  background: var(--n-3);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  box-shadow: 0 16px 40px -12px rgba(0,0,0,0.6);
+  animation: stu-pop var(--fast) var(--ease);
+}
+@keyframes stu-pop { from { opacity: 0; transform: translateY(-3px); } }
+.stu-pop-head { padding: 6px 8px 5px; }
+.stu-pop-row {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 7px 8px;
+  border-radius: var(--r);
+  transition: background var(--fast) var(--ease);
+}
+.stu-pop-row:hover { background: var(--n-4); }
+.stu-pop-row.is-on { background: var(--n-4); }
+.stu-pop-main { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
+.stu-pop-name { font-size: 12.5px; color: var(--t-1); }
+.stu-pop-desc { font-size: 11px; color: var(--t-4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stu-pop-meta { display: flex; align-items: center; gap: 8px; flex: none; }
+.stu-pop-needs {
+  font-size: 10.5px; font-weight: 550; color: var(--signal);
+  background: var(--signal-dim); border-radius: 99px;
+  min-width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center;
+}
+.stu-pop-when { font-size: 10.5px; color: var(--t-4); min-width: 62px; text-align: right; }
+
+.stu-chrome-intent {
+  font-size: 12px; color: var(--t-3);
+  padding-left: 14px; border-left: 1px solid var(--line);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.stu-chrome-right { margin-left: auto; display: flex; align-items: center; gap: 12px; flex: none; }
+.stu-chrome-run { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--t-3); }
+.stu-chrome-needs {
+  height: 22px; padding: 0 9px;
+  border-radius: 99px;
+  font-size: 11.5px; color: var(--t-3);
+  border: 1px solid transparent;
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.stu-chrome-needs.is-signal {
+  color: var(--signal-bright);
+  background: var(--signal-dim);
+  border-color: var(--signal-line);
+}
+.stu-chrome-needs.is-signal:hover { background: rgba(211,162,76,0.24); }
+
+/* ---- Conversation -------------------------------------------------------*/
+.stu-talk {
+  grid-area: talk;
+  display: flex; flex-direction: column;
+  min-width: 0; min-height: 0;
+  background: var(--n-1);
+  border-right: 1px solid var(--line);
+}
+.stu-talk-head {
+  flex: none;
+  display: flex; align-items: baseline; gap: 9px;
+  padding: 13px 18px 11px;
+  border-bottom: 1px solid var(--line);
+}
+.stu-talk-title { font-size: 12.5px; font-weight: 550; color: var(--t-1); }
+.stu-talk-sub { font-size: 11px; color: var(--t-4); }
+
+.stu-talk-scroll {
+  flex: 1; min-height: 0;
+  overflow-y: auto;
+  padding: 16px 18px 20px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+.stu-msg { display: flex; flex-direction: column; gap: 4px; }
+.stu-msg-head { display: flex; align-items: baseline; gap: 8px; }
+.stu-msg-who { font-size: 11.5px; font-weight: 550; color: var(--t-2); }
+.stu-msg.is-you .stu-msg-who { color: var(--t-3); }
+.stu-msg-at { font-size: 10.5px; color: var(--t-4); }
+.stu-msg-body {
+  margin: 0;
+  font-size: 12.5px; line-height: 1.55;
+  color: var(--t-2);
+}
+.stu-msg.is-you .stu-msg-body {
+  color: var(--t-1);
+  padding-left: 10px;
+  border-left: 1.5px solid var(--n-5);
+}
+.stu-msg + .stu-msg { margin-top: -2px; }
+
+/* The break in the conversation while the window was closed. */
+.stu-away { display: flex; align-items: center; gap: 12px; margin: 6px 0 -2px; }
+.stu-away-line { flex: 1; height: 1px; background: var(--line); }
+.stu-away-text { font-size: 10.5px; color: var(--t-4); letter-spacing: 0.01em; flex: none; }
+
+/* The brief itself */
+.stu-brief { gap: 10px; }
+.stu-brief-block {
+  border-left: 1px solid var(--line-2);
+  padding-left: 12px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.stu-brief-label { margin-bottom: 3px; }
+
+.stu-brief-need {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%; padding: 4px 6px 4px 0;
+  margin-left: -6px; padding-left: 6px;
+  border-radius: var(--r-sm);
+  transition: background var(--fast) var(--ease);
+}
+.stu-brief-need:hover:not(:disabled) { background: var(--n-3); }
+.stu-brief-need-t {
+  font-size: 12.5px; color: var(--t-1);
+  flex: 1; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.stu-brief-need-ref { font-size: 10.5px; color: var(--t-4); flex: none; }
+.stu-brief-need.is-done .stu-brief-need-t { color: var(--t-4); text-decoration: line-through; text-decoration-color: var(--n-5); }
+.stu-brief-empty { font-size: 12px; color: var(--t-4); padding: 3px 0; }
+
+.stu-brief-row { display: flex; align-items: baseline; gap: 10px; padding: 3px 0; }
+.stu-brief-row-t {
+  font-size: 12.5px; color: var(--t-2);
+  flex: 1; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.stu-brief-row-m { font-size: 10.5px; color: var(--t-4); flex: none; }
+.stu-brief-did { color: var(--t-2); }
+
+/* Threads the coordinator opened, sitting inside the conversation. */
+.stu-thread {
+  display: flex; flex-direction: column; gap: 6px;
+  width: 100%; padding: 10px 12px;
+  background: var(--n-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  transition: background var(--fast) var(--ease), border-color var(--fast) var(--ease);
+}
+.stu-thread:hover { background: var(--n-3); border-color: var(--line-2); }
+.stu-thread-top { display: flex; align-items: baseline; gap: 9px; }
+.stu-thread-ref { font-size: 11px; color: var(--t-4); }
+.stu-thread-state { font-size: 11px; color: var(--t-2); }
+.stu-thread-at { margin-left: auto; font-size: 10.5px; color: var(--t-4); }
+.stu-thread-title { font-size: 12.5px; color: var(--t-1); line-height: 1.4; }
+.stu-thread-bar, .stu-card-bar { display: flex; gap: 3px; }
+.stu-thread-bar i, .stu-card-bar i {
+  flex: 1; height: 2px; border-radius: 99px;
+  background: rgba(255,255,255,0.07);
+}
+.stu-thread-bar i.is-done, .stu-card-bar i.is-done { background: rgba(255,255,255,0.26); }
+.stu-thread-bar i.is-run,  .stu-card-bar i.is-run  { background: var(--live); }
+.stu-card-bar i.is-held { background: var(--signal-line); }
+.stu-thread-meta { font-size: 10.5px; color: var(--t-4); }
+
+/* ---- Composer -----------------------------------------------------------*/
+.stu-composer {
+  flex: none;
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 14px 14px;
+  padding: 0 10px 0 12px;
+  height: 38px;
+  background: var(--n-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  transition: border-color var(--base) var(--ease), background var(--base) var(--ease);
+}
+.stu-composer:focus-within { border-color: var(--line-3); background: var(--n-3); }
+.stu-composer input { flex: 1; min-width: 0; font-size: 12.5px; color: var(--t-1); }
+.stu-composer input::placeholder { color: var(--t-4); }
+.stu-composer input:focus-visible { outline: none; }
+.stu-composer .kbd { flex: none; }
+.stu-composer-send {
+  display: flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; flex: none;
+  border-radius: var(--r-sm);
+  color: var(--n-0); background: var(--signal);
+  transition: background var(--fast) var(--ease);
+}
+.stu-composer-send:hover { background: var(--signal-bright); }
+
+/* ---- Board --------------------------------------------------------------*/
+.stu-board {
+  grid-area: board;
+  display: flex; flex-direction: column;
+  min-width: 0; min-height: 0;
+  background: var(--n-2);
+}
+.stu-board-head {
+  flex: none;
+  display: flex; align-items: center; gap: 16px;
+  padding: 9px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.stu-views { display: flex; gap: 1px; }
+.stu-view {
+  height: 24px; padding: 0 10px;
+  font-size: 12px; color: var(--t-3);
+  border-radius: var(--r);
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.stu-view:hover { color: var(--t-1); background: var(--n-3); }
+.stu-view.is-on { color: var(--t-1); background: var(--n-4); }
+.stu-board-note {
+  font-size: 11px; color: var(--t-4);
+  margin-left: auto; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.stu-cols {
+  flex: 1; min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(210px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  overflow-x: auto;
+}
+.stu-col {
+  display: flex; flex-direction: column;
+  min-width: 0; min-height: 0;
+  background: var(--n-2);
+}
+.stu-col-head {
+  flex: none;
+  display: flex; align-items: center; gap: 8px;
+  padding: 13px 14px 9px;
+}
+.stu-col-title { font-size: 11.5px; font-weight: 550; color: var(--t-2); }
+.stu-col-count {
+  font-size: 10.5px; color: var(--t-4);
+  font-variant-numeric: tabular-nums;
+}
+.stu-col-count.is-signal {
+  color: var(--signal); background: var(--signal-dim);
+  min-width: 16px; height: 16px; border-radius: 99px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.stu-col-body {
+  flex: 1; min-height: 0;
+  overflow-y: auto;
+  padding: 0 10px 14px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.stu-col-empty { font-size: 11.5px; color: var(--t-4); padding: 6px 4px; line-height: 1.5; }
+
+.stu-card {
+  display: flex; flex-direction: column; gap: 7px;
+  width: 100%; padding: 10px 11px;
+  background: var(--n-3);
+  border: 1px solid transparent;
+  border-radius: var(--r-lg);
+  transition: background var(--fast) var(--ease), border-color var(--fast) var(--ease), transform var(--fast) var(--ease);
+}
+.stu-card:hover { background: var(--n-4); }
+.stu-card.is-on { border-color: var(--line-3); background: var(--n-4); }
+.stu-card:active { transform: translateY(0.5px); }
+
+.stu-card-top { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.stu-card-ref { font-size: 10.5px; color: var(--t-4); flex: none; }
+.stu-card-kind {
+  font-size: 10.5px; color: var(--t-3);
+  min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.stu-card-kind.is-signal { color: var(--signal); }
+.stu-card-at { margin-left: auto; font-size: 10.5px; color: var(--t-4); flex: none; }
+.stu-card-title { font-size: 12.5px; line-height: 1.4; color: var(--t-1); }
+.stu-card-foot {
+  display: block;
+  font-size: 10.5px; color: var(--t-4);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.stu-card-added { color: var(--t-3); margin-left: 8px; }
+
+/* Attention cards carry the only colour on the board. */
+.stu-card.is-att {
+  background: var(--n-3);
+  border-left: 2px solid var(--signal);
+  padding-left: 10px;
+  border-radius: var(--r-sm) var(--r-lg) var(--r-lg) var(--r-sm);
+}
+.stu-card.is-att:hover { background: rgba(211,162,76,0.07); }
+.stu-card.is-att.is-on { background: rgba(211,162,76,0.1); border-color: var(--signal); }
+.stu-card.is-held { background: var(--n-2); border: 1px dashed var(--line-2); }
+.stu-card.is-held:hover { background: var(--n-3); }
+.stu-card.is-settled { background: transparent; border: 1px solid var(--line); }
+.stu-card.is-settled:hover { background: var(--n-3); }
+.stu-card.is-settled .stu-card-title { color: var(--t-2); }
+.stu-card.is-new { animation: stu-card-in var(--slow) var(--ease); }
+@keyframes stu-card-in {
+  from { opacity: 0; transform: translateY(-6px); }
+}
+
+/* ---- Knowledge and artifacts -------------------------------------------*/
+.stu-plain {
+  flex: 1; min-height: 0; overflow-y: auto;
+  padding: 18px;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px;
+  align-content: start;
+}
+.stu-plain-col { display: flex; flex-direction: column; min-width: 0; }
+.stu-plain-wide { grid-column: 1 / -1; max-width: 720px; }
+.stu-plain-label { padding-bottom: 8px; }
+.stu-plain-row {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+  min-width: 0;
+}
+.stu-plain-t {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12.5px; line-height: 1.4; color: var(--t-1);
+  min-width: 0;
+}
+.stu-plain-t .dot-signal { margin-left: -14px; }
+.stu-plain-meta { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.stu-plain-m { font-size: 11px; color: var(--t-3); }
+.stu-plain-u {
+  font-size: 11px; color: var(--t-4);
+  min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.stu-plain-col { padding-left: 14px; }
+
+/* ---- Peek ---------------------------------------------------------------
+   Opening a card slides a panel over the board, never over the conversation:
+   you keep talking to the coordinator while you read. */
+.stu-peek {
+  position: absolute;
+  top: 40px; right: 0; bottom: 0;
+  width: 430px; max-width: 100%;
+  z-index: 30;
+  display: flex; flex-direction: column;
+  background: var(--n-1);
+  border-left: 1px solid var(--line-2);
+  box-shadow: -24px 0 48px -24px rgba(0,0,0,0.55);
+  animation: stu-peek-in var(--base) var(--ease);
+}
+@keyframes stu-peek-in { from { transform: translateX(14px); opacity: 0; } }
+
+.stu-peek-head {
+  flex: none;
+  display: flex; align-items: center; gap: 10px;
+  height: 38px; padding: 0 10px 0 18px;
+  border-bottom: 1px solid var(--line);
+}
+.stu-peek-kind { font-size: 11px; font-weight: 550; }
+.stu-peek-kind.is-signal { color: var(--signal); }
+.stu-peek-ref { font-size: 11px; color: var(--t-3); }
+.stu-peek-at { font-size: 10.5px; color: var(--t-4); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stu-peek-close {
+  margin-left: auto; flex: none;
+  width: 22px; height: 22px; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--t-4);
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.stu-peek-close:hover { color: var(--t-1); background: var(--n-3); }
+
+.stu-peek-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 18px 22px; }
+.stu-peek-title { margin: 0 0 8px; font-size: 15px; font-weight: 550; line-height: 1.35; color: var(--t-1); }
+.stu-peek-because { margin: 0 0 8px; font-size: 12.5px; line-height: 1.5; color: var(--t-2); }
+.stu-peek-detail { margin: 0 0 4px; font-size: 12.5px; line-height: 1.55; color: var(--t-3); }
+.stu-peek-label { margin: 18px 0 8px; }
+
+.stu-peek-options { display: flex; flex-direction: column; gap: 6px; }
+.stu-opt {
+  display: flex; gap: 10px; padding: 10px 12px;
+  background: var(--n-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.stu-opt:hover { background: var(--n-3); border-color: var(--line-2); }
+.stu-opt.is-on { border-color: var(--signal-line); background: rgba(211,162,76,0.07); }
+.stu-opt-mark {
+  width: 12px; height: 12px; margin-top: 2px; flex: none;
+  border-radius: 99px;
+  border: 1px solid var(--n-5);
+  transition: border-color var(--fast) var(--ease), box-shadow var(--fast) var(--ease);
+}
+.stu-opt.is-on .stu-opt-mark { border-color: var(--signal); box-shadow: inset 0 0 0 3px var(--signal); }
+.stu-opt-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.stu-opt-label { font-size: 12.5px; color: var(--t-1); }
+.stu-opt-note { font-size: 11.5px; line-height: 1.5; color: var(--t-3); }
+
+.stu-peek-ev { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+.stu-peek-ev li {
+  font-size: 11.5px; line-height: 1.5; color: var(--t-3);
+  padding: 7px 0; border-top: 1px solid var(--line);
+}
+
+.stu-peek-act { margin-top: 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.stu-btn {
+  height: 28px; padding: 0 13px;
+  border-radius: var(--r);
+  font-size: 12px; font-weight: 500;
+  color: var(--n-0); background: var(--signal);
+  transition: background var(--fast) var(--ease);
+}
+.stu-btn:hover:not(:disabled) { background: var(--signal-bright); }
+.stu-btn:disabled { background: var(--n-4); color: var(--t-4); }
+.stu-peek-act-note { font-size: 11px; color: var(--t-4); }
+
+/* Execution inside a card */
+.stu-graph { margin: 0; padding: 0; list-style: none; }
+.stu-node { display: flex; gap: 11px; position: relative; padding-bottom: 14px; }
+.stu-node:last-child { padding-bottom: 0; }
+.stu-node::before {
+  content: ''; position: absolute; left: 5px; top: 13px; bottom: -1px;
+  width: 1px; background: var(--line-2);
+}
+.stu-node:last-child::before { display: none; }
+.stu-node-dot {
+  width: 11px; flex: none; display: flex; justify-content: center; padding-top: 4px;
+  position: relative; z-index: 1;
+}
+.stu-node-dot > * { box-shadow: 0 0 0 3.5px var(--n-1); }
+.stu-node-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.stu-node-label { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--t-1); }
+.stu-node.is-queued .stu-node-label { color: var(--t-3); }
+.stu-node-added {
+  font-size: 10px; color: var(--signal);
+  background: var(--signal-dim);
+  border: 1px solid var(--signal-line);
+  border-radius: 99px; padding: 0 6px; line-height: 15px;
+}
+.stu-node-meta { font-size: 11px; color: var(--t-4); }
+.stu-peek-foot { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--t-4); }
+
+/* ---- Compact window -----------------------------------------------------
+   Below ~1180 the conversation gives up width first. Below ~980 the two
+   surfaces stop competing and become one pane at a time. */
+@media (max-width: 1180px) {
+  .stu { grid-template-columns: 360px minmax(0, 1fr); }
+  .stu-cols { grid-template-columns: repeat(4, minmax(186px, 1fr)); }
+  .stu-chrome-intent { display: none; }
+}
+
+.stu-panes { display: flex; gap: 1px; margin-left: auto; }
+.stu-pane-tab {
+  height: 22px; padding: 0 9px;
+  font-size: 11.5px; color: var(--t-4);
+  border-radius: var(--r);
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.stu-pane-tab:hover { color: var(--t-2); }
+.stu-pane-tab.is-on { color: var(--t-1); background: var(--n-3); }
+
+.stu.is-narrow {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'chrome' 'talk';
+}
+.stu.is-narrow .stu-talk { border-right: 0; }
+.stu.is-narrow.pane-talk  .stu-board { display: none; }
+.stu.is-narrow.pane-board { grid-template-areas: 'chrome' 'board'; }
+.stu.is-narrow.pane-board .stu-talk { display: none; }
+.stu.is-narrow .stu-chrome-right { margin-left: 0; }
+.stu.is-narrow .stu-cols { grid-template-columns: repeat(4, minmax(178px, 1fr)); }
+.stu.is-narrow .stu-plain { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.stu.is-narrow .stu-peek { width: 100%; border-left: 0; }
+
+/* At one-pane width the conversation would otherwise run to a 700px measure. */
+.stu.is-narrow .stu-talk-scroll {
+  padding-left: max(18px, calc((100% - 660px) / 2));
+  padding-right: max(18px, calc((100% - 660px) / 2));
+}
+.stu.is-narrow .stu-composer {
+  width: 100%; max-width: 660px;
+  margin-left: auto; margin-right: auto;
+}
+.stu.is-narrow .stu-talk-head {
+  padding-left: max(18px, calc((100% - 660px) / 2));
+}

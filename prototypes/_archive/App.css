@@ -1,0 +1,72 @@
+.app { height: 100%; display: flex; flex-direction: column; background: var(--n-0); }
+
+/* The prototype's own chrome. Deliberately a different material from the
+   product so it never reads as part of the design. */
+.protobar {
+  height: 30px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 10px 0 12px;
+  background: #08090b;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  user-select: none;
+}
+.protobar-back {
+  font-size: 11px;
+  color: var(--t-4);
+  padding: 3px 5px;
+  margin-left: -5px;
+  border-radius: var(--r-sm);
+  transition: color var(--fast) var(--ease);
+  white-space: nowrap;
+}
+.protobar-back:hover { color: var(--t-2); }
+
+.protobar-tabs { display: flex; gap: 1px; }
+.protobar-tab {
+  display: flex; align-items: center; gap: 6px;
+  height: 20px; padding: 0 9px;
+  font-size: 11px; font-weight: 450;
+  color: var(--t-4);
+  border-radius: var(--r-sm);
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.protobar-tab:hover { color: var(--t-2); background: rgba(255,255,255,0.03); }
+.protobar-tab.is-on { color: var(--t-1); background: rgba(255,255,255,0.06); }
+.protobar-num {
+  font-size: 9.5px; font-variant-numeric: tabular-nums;
+  color: var(--t-4); min-width: 6px;
+}
+.protobar-tab.is-on .protobar-num { color: var(--signal); }
+
+.protobar-hint { margin-left: auto; display: flex; align-items: center; gap: 3px; }
+.protobar-hint .kbd { background: rgba(255,255,255,0.045); border-color: transparent; color: var(--t-4); }
+.protobar-hint-sep { width: 1px; height: 10px; background: rgba(255,255,255,0.08); margin: 0 5px; }
+
+.app-stage {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  animation: stage-in var(--slow) var(--ease);
+}
+@keyframes stage-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ---- macOS traffic lights — every direction is a real desktop window ----*/
+.traffic { display: flex; align-items: center; gap: 8px; flex: none; }
+.traffic i {
+  width: 11px; height: 11px; border-radius: 99px; display: block;
+  background: var(--n-5);
+}
+.traffic i:nth-child(1) { background: #3f4550; }
+.traffic i:nth-child(2) { background: #3f4550; }
+.traffic i:nth-child(3) { background: #3f4550; }
+.app-stage:hover .traffic i:nth-child(1) { background: #e0685c; }
+.app-stage:hover .traffic i:nth-child(2) { background: #dfa53f; }
+.app-stage:hover .traffic i:nth-child(3) { background: #62b04f; }
+.traffic i { transition: background var(--base) var(--ease); }

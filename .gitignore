@@ -1,0 +1,6 @@
+# Local and generated files
+.DS_Store
+node_modules/
+dist/
+.vite/
+npm-debug.log*

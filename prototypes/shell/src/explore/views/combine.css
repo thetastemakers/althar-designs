@@ -1,0 +1,216 @@
+/* The combinations of the record and the queue.
+
+   Same rule as the rest of knowledge: no brass. An open item is marked by a
+   hairline in the margin of the row it concerns, which is a mark you have to
+   already be reading the record to see — and that is the point. Nothing
+   here is stopped, so nothing here reaches for the colour that says so. */
+
+/* ---- The margin mark ----------------------------------------------------
+   One hairline standing beside a row, in the space the table already has.
+   It is the only thing shared by all four directions. */
+.kv-row { position: relative; }
+.kv-row.is-flag::before,
+.kv-row.is-changed::before {
+  content: ''; position: absolute; left: -14px; top: 7px; bottom: 7px;
+  width: 1px; background: var(--line-3);
+  transition: background var(--fast) var(--ease);
+}
+.kv-row.is-changed::before { background: var(--n-5); }
+.kv-row.is-sel::before { background: var(--t-3); }
+.kv-row.is-sel > .kv-tr { background: var(--n-3); }
+
+.kc-tag {
+  flex: none; margin-left: 2px;
+  font-size: 10.5px; line-height: 15px; color: var(--t-4);
+  border: 1px solid var(--line-2); border-radius: 99px; padding: 0 7px;
+  white-space: nowrap;
+}
+.kc-tag.is-done { border-style: dashed; border-color: var(--line); }
+.kc-just { color: var(--t-3); }
+
+.kc-against {
+  position: relative; margin: 12px 0 0; padding-left: 15px;
+  font-size: 12.5px; line-height: 1.6; color: var(--t-3);
+}
+.kc-against .kv-dispute-mark { top: 5px; }
+.kc-against-t { color: var(--t-2); }
+.kc-against .kv-src { margin-left: 8px; }
+
+/* ---- Ledger: the stepper ------------------------------------------------
+   The one thing the queue keeps when it dissolves into the table. Without
+   it four marked rows in fifteen are four rows nobody scrolls to. */
+.kc-step {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 16px; padding: 9px 12px 9px 13px;
+  border: 1px solid var(--line-2); border-radius: var(--r);
+  background: var(--n-1);
+}
+.kc-step.is-clear { border-style: dashed; border-color: var(--line); background: none; }
+.kc-step-n {
+  font-size: 12px; color: var(--t-1); font-variant-numeric: tabular-nums;
+  border-right: 1px solid var(--line-2); padding-right: 10px;
+}
+.kc-step-t { font-size: 12.5px; color: var(--t-3); }
+.kc-step-done { color: var(--t-4); }
+.kc-step-go { display: flex; gap: 2px; margin-left: auto; }
+.kc-step-go button {
+  width: 22px; height: 22px; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--t-4);
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.kc-step-go button:hover { background: var(--n-3); color: var(--t-2); }
+.kc-step-b {
+  height: 24px; padding: 0 11px; border-radius: var(--r-sm);
+  border: 1px solid var(--line-2); font-size: 12px; color: var(--t-2);
+  transition: background var(--fast) var(--ease);
+}
+.kc-step-b:hover { background: var(--n-4); }
+
+/* ---- Desk: the record, with the margin ----------------------------------*/
+.kc-desk { flex-direction: row; }
+.kc-desk-main { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.kc-desk .kv-head > *, .kc-desk .kv-table { max-width: none; }
+
+.kc-rail {
+  flex: none; width: 384px; overflow-y: auto;
+  padding: 26px 22px 40px;
+  border-left: 1px solid var(--line);
+  background: var(--n-1);
+}
+.kc-rail-head { display: flex; align-items: baseline; gap: 10px; }
+.kc-rail-n { margin-left: auto; font-size: 11.5px; color: var(--t-4); font-variant-numeric: tabular-nums; }
+.kc-rail-lede { margin: 8px 0 16px; font-size: 12px; line-height: 1.6; color: var(--t-4); }
+.kc-rail-list { display: flex; flex-direction: column; gap: 8px; }
+
+.kc-ritem {
+  border: 1px solid var(--line); border-radius: var(--r);
+  background: var(--n-2);
+  transition: border-color var(--fast) var(--ease), opacity var(--base) var(--ease);
+}
+.kc-ritem.is-on { border-color: var(--line-3); }
+.kc-ritem.is-done { opacity: 0.55; }
+.kc-ritem-top {
+  display: flex; flex-direction: column; gap: 6px; width: 100%;
+  padding: 11px 13px; text-align: left;
+}
+.kc-ritem-head { display: flex; align-items: baseline; gap: 10px; }
+.kc-ritem-t { font-size: 12.5px; line-height: 1.45; color: var(--t-1); }
+.kc-ritem-on { font-size: 11.5px; line-height: 1.45; color: var(--t-4); }
+.kc-ritem-open {
+  padding: 0 13px 14px; animation: kv-in var(--fast) var(--ease);
+}
+.kc-ritem-open .kv-item-detail { margin-top: 0; font-size: 12.5px; }
+.kc-ritem-open .kv-item-cost { font-size: 12px; }
+
+/* ---- Deck: two panes ----------------------------------------------------
+   Both panes hang off the same left edge as the table below them, so the
+   split reads as two halves of one screen rather than two applications. */
+.kc-deck { --gut: max(32px, calc((100% - 1240px) / 2 + 30px)); }
+.kc-deck-top {
+  flex: 0 0 43%; min-height: 0;
+  display: flex; flex-direction: column;
+  background: var(--n-0);
+  transition: flex-basis var(--slow) var(--ease);
+}
+.kc-deck-top.is-folded { flex: none; }
+.kc-deck-head {
+  flex: none; display: flex; align-items: baseline; gap: 12px;
+  padding: 18px var(--gut) 12px;
+}
+.kc-deck-n { font-size: 11.5px; color: var(--t-3); font-variant-numeric: tabular-nums; }
+.kc-deck-note { font-size: 11.5px; color: var(--t-4); }
+.kc-deck-shut {
+  margin-left: auto; font-size: 11.5px; color: var(--t-4);
+  transition: color var(--fast) var(--ease);
+}
+.kc-deck-shut:hover { color: var(--t-2); }
+.kc-deck-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 0 var(--gut) 24px; }
+.kc-deck-scroll > .kv-item { max-width: 700px; background: var(--n-1); }
+.kc-deck-scroll > .kv-item:first-child { margin-top: 4px; }
+
+.kc-deck-clear {
+  width: 100%; padding: 13px var(--gut); text-align: left;
+  display: flex; align-items: center; gap: 9px;
+  font-size: 12.5px; color: var(--t-4);
+  transition: color var(--fast) var(--ease);
+}
+.kc-deck-clear:hover { color: var(--t-2); }
+
+.kc-div {
+  flex: none; display: flex; align-items: center; gap: 12px;
+  padding: 0 var(--gut); height: 40px;
+  border-top: 1px solid var(--line-2); border-bottom: 1px solid var(--line);
+  background: var(--n-2);
+}
+.kc-div-t { font-size: 12px; color: var(--t-2); }
+.kc-div-m { font-size: 11.5px; color: var(--t-4); }
+.kc-div .kv-filters { margin: 0 0 0 auto; }
+.kc-div .kv-filter { height: 39px; border-radius: 0; }
+
+.kc-deck-bot { background: var(--n-2); }
+.kc-deck-bot .kv-table { padding-top: 6px; }
+.kc-deck-bot .kv-tr.is-head { display: none; }
+
+/* ---- Rounds: the door ---------------------------------------------------*/
+.kc-door .kv-q-head .eyebrow { display: block; margin-bottom: 10px; }
+
+.kc-cross { margin-top: 34px; padding-top: 20px; border-top: 1px solid var(--line); }
+.kc-cross-b {
+  display: flex; align-items: center; gap: 9px;
+  height: 32px; padding: 0 15px;
+  border: 1px solid var(--line-2); border-radius: var(--r);
+  font-size: 12.5px; color: var(--t-2);
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.kc-cross-b:hover { background: var(--n-4); color: var(--t-1); }
+.kc-cross.is-clear .kc-cross-b { border-color: var(--line-3); color: var(--t-1); }
+.kc-cross-m { display: block; margin-top: 9px; font-size: 11.5px; color: var(--t-4); }
+
+.kc-back-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.kc-back {
+  display: flex; align-items: center; gap: 7px;
+  height: 24px; padding: 0 10px 0 7px;
+  border: 1px solid var(--line-2); border-radius: var(--r-sm);
+  font-size: 12px; color: var(--t-2);
+  transition: background var(--fast) var(--ease);
+}
+.kc-back:hover { background: var(--n-4); }
+.kc-back-m { font-size: 11.5px; color: var(--t-4); }
+
+/* ---- Narrow ---------------------------------------------------------------
+   The sidecar has no margin to put a rail in and no height to split. Desk
+   drops the rail under the record; Deck stops being two panes and becomes
+   one scroll with the divider still in it. The bracket moves inside. */
+@container (max-width: 700px) {
+  /* There is no margin in a dock, so the margin goes underneath — bounded,
+     because a rail that is allowed to be as tall as it likes leaves the
+     record it was annotating with no height at all. */
+  .kc-desk { flex-direction: column; }
+  .kc-desk-main { flex: 1 1 auto; min-height: 0; }
+  .kc-rail {
+    flex: 0 0 auto; width: auto; max-height: 46%;
+    border-left: 0; border-top: 1px solid var(--line);
+    padding: 16px 16px 24px;
+  }
+}
+@container (max-width: 560px) {
+  .kv-table { padding-left: 24px; }
+  .kv-row.is-flag::before, .kv-row.is-changed::before { left: -12px; }
+  /* The tag stays in the dock. A 1px hairline is enough of a mark when the
+     row has columns around it; in a panel this narrow it is not. */
+  .kc-tag { font-size: 10px; padding: 0 6px; }
+  .kc-step { flex-wrap: wrap; gap: 8px; margin-top: 14px; padding: 9px 10px; }
+  .kc-step-b { display: none; }
+
+  .kc-deck-top { flex: 0 0 auto; max-height: 52%; }
+  .kc-deck { --gut: 16px; }
+  .kc-deck-note { display: none; }
+  .kc-div { height: auto; padding-top: 8px; align-items: baseline; flex-wrap: wrap; gap: 0 10px; }
+  .kc-div-m { display: none; }
+  .kc-div .kv-filters { margin-left: auto; }
+  .kc-div .kv-filter { height: 32px; padding: 0 8px; }
+
+  .kc-door .kv-q { padding-top: 22px; }
+  .kc-back-m { display: none; }
+}

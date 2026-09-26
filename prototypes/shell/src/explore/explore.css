@@ -1,0 +1,215 @@
+/* The directions picker and the two placement stages. Prototype chrome is a
+   different material from the product so it never reads as part of it. */
+
+.ex { height: 100%; display: flex; flex-direction: column; background: var(--n-0); overflow: hidden; }
+
+/* ---- The picker ---------------------------------------------------------*/
+.ex-pick {
+  flex: 1; min-height: 0; overflow-y: auto;
+  padding: 34px 48px 0;
+  display: flex; flex-direction: column; align-items: center;
+}
+.ex-head { width: 100%; max-width: 1000px; }
+.ex-mark { display: flex; align-items: center; gap: 8px; color: var(--t-1); font-weight: 550; font-size: 13px; }
+.ex-mark svg { color: var(--t-3); }
+.ex-sub { margin: 10px 0 0; max-width: 640px; font-size: 13px; line-height: 1.6; color: var(--t-3); }
+
+.ex-placement {
+  width: 100%; max-width: 1000px;
+  margin: 22px 0 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+.ex-placement .eyebrow { flex: none; }
+.ex-placement-note { flex: 1; margin: 0; font-size: 12px; color: var(--t-4); }
+.ex-placement .kbd { flex: none; }
+
+.ex-seg { display: flex; gap: 1px; padding: 2px; background: var(--n-1); border: 1px solid var(--line); border-radius: var(--r); }
+.ex-seg-b {
+  height: 22px; padding: 0 11px; border-radius: var(--r-sm);
+  font-size: 12px; color: var(--t-3);
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.ex-seg-b:hover { color: var(--t-2); }
+.ex-seg-b.is-on { color: var(--t-1); background: var(--n-4); }
+
+/* ---- The four directions ------------------------------------------------*/
+.ex-grid {
+  width: 100%; max-width: 1000px;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;
+}
+.ex-cell {
+  padding: 10px;
+  border: 1px solid var(--line); border-radius: var(--r);
+  background: var(--n-1);
+  transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.ex-cell:hover { background: var(--n-2); }
+.ex-cell.is-focus { border-color: var(--line-3); background: var(--n-2); }
+
+.ex-thumb { display: block; width: 100%; height: auto; }
+.ex-th-bg { fill: var(--n-2); }
+.ex-cell.is-focus .ex-th-bg { fill: var(--n-0); }
+.ex-th-rail { fill: rgba(255,255,255,0.025); }
+.ex-th-card { fill: none; stroke: var(--n-5); stroke-width: 0.8; }
+.ex-th-line { fill: var(--n-5); }
+.ex-th-rule { fill: var(--n-5); }
+.ex-th-d { fill: var(--t-3); }
+.ex-th-b { fill: rgba(255,255,255,0.28); }
+.ex-th-f { fill: rgba(255,255,255,0.12); }
+.ex-th-f.is-sel { fill: rgba(255,255,255,0.34); }
+.ex-th-o { fill: none; stroke: var(--n-5); stroke-width: 0.9; }
+.ex-th-o.is-fill { fill: var(--t-3); stroke: var(--t-3); }
+/* The disputed claim, marked the way the views mark it: underlined, not
+   coloured. Nothing in this prototype is stopped, so nothing is brass. */
+.ex-th-u { fill: var(--t-4); }
+
+.ex-cell-foot { display: flex; align-items: flex-start; gap: 10px; padding: 11px 2px 3px; }
+.ex-n {
+  font-size: 10.5px; line-height: 17px; width: 17px; height: 17px; flex: none;
+  text-align: center; border-radius: var(--r-sm);
+  background: var(--n-3); color: var(--t-4);
+  font-variant-numeric: tabular-nums;
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.ex-cell.is-focus .ex-n { background: var(--n-5); color: var(--t-2); }
+.ex-cell-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ex-name { font-size: 13px; font-weight: 500; color: var(--t-2); }
+.ex-cell.is-focus .ex-name { color: var(--t-1); }
+.ex-owns { font-size: 11.5px; color: var(--t-4); }
+.ex-cell-go { margin-left: auto; align-self: center; color: var(--t-4); opacity: 0; transition: opacity var(--fast) var(--ease); }
+.ex-cell.is-focus .ex-cell-go { opacity: 1; }
+
+/* ---- Detail -------------------------------------------------------------*/
+.ex-detail {
+  width: 100%; max-width: 1000px;
+  margin-top: 20px; padding: 16px 0 0;
+  border-top: 1px solid var(--line);
+  display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 40px;
+  animation: ex-in var(--base) var(--ease);
+}
+@keyframes ex-in { from { opacity: 0; } to { opacity: 1; } }
+.ex-detail-main h2 { margin: 0 0 8px; font-size: 14px; font-weight: 550; color: var(--t-1); }
+.ex-line { margin: 0; font-size: 13px; line-height: 1.6; color: var(--t-2); max-width: 56ch; }
+
+.ex-dl { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.ex-dl div { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 12px; }
+.ex-dl dt { font-size: 11px; color: var(--t-4); padding-top: 1px; }
+.ex-dl dd { margin: 0; font-size: 12.5px; line-height: 1.55; color: var(--t-2); }
+
+.ex-foot {
+  width: 100%; max-width: 1000px;
+  margin-top: auto; padding: 18px 0 16px;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11.5px; color: var(--t-4);
+}
+.ex-foot .kbd { margin-right: 2px; }
+.ex-foot-sep { width: 1px; height: 11px; background: var(--line-2); margin: 0 6px; }
+.ex-foot-link { margin-left: auto; color: var(--t-3); text-decoration: none; }
+.ex-foot-link:hover { color: var(--t-1); }
+
+/* The first round, kept within reach. Quieter than the grid on purpose:
+   these are the arguments this round is built out of, not the choices. */
+.ex-also {
+  width: 100%; max-width: 1000px;
+  margin-top: 20px; padding-top: 14px;
+  border-top: 1px solid var(--line);
+  display: flex; align-items: center; gap: 4px;
+}
+.ex-also .eyebrow { flex: none; margin-right: 10px; }
+.ex-also-b {
+  display: flex; align-items: center; gap: 7px;
+  height: 24px; padding: 0 9px; border-radius: var(--r-sm);
+  font-size: 12px; color: var(--t-3);
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.ex-also-b:hover { color: var(--t-1); background: var(--n-1); }
+.ex-also-b.is-on { color: var(--t-1); background: var(--n-2); }
+
+/* ---- Prototype bar ------------------------------------------------------*/
+.ex-bar {
+  height: 30px; flex: none;
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 10px 0 12px;
+  background: #08090b;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  user-select: none;
+}
+.ex-bar-back { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--t-4); white-space: nowrap; }
+.ex-bar-back:hover { color: var(--t-2); }
+.ex-bar-seg { display: flex; gap: 1px; }
+.ex-bar-b {
+  display: flex; align-items: center; gap: 5px;
+  height: 20px; padding: 0 9px;
+  font-size: 11px; color: var(--t-4); border-radius: var(--r-sm);
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.ex-bar-b:hover { color: var(--t-2); background: rgba(255,255,255,0.03); }
+.ex-bar-b.is-on { color: var(--t-1); background: rgba(255,255,255,0.06); }
+.ex-bar-seg.is-quiet .ex-bar-b { font-size: 10.5px; }
+.ex-bar-n { font-size: 9.5px; color: var(--t-4); }
+.ex-bar-hint { margin-left: auto; display: flex; align-items: center; gap: 3px; }
+.ex-bar-hint .kbd { background: rgba(255,255,255,0.045); border-color: transparent; color: var(--t-4); }
+.ex-bar-hint-sep { width: 1px; height: 10px; background: rgba(255,255,255,0.08); margin: 0 5px; }
+
+/* ---- Stages -------------------------------------------------------------*/
+.ex-stage { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+.ex-win { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--n-2); }
+.ex-win-body { flex: 1; min-height: 0; position: relative; display: flex; container-type: inline-size; }
+.ex-win-body > * { min-width: 0; }
+
+.ex-chrome {
+  height: 44px; flex: none;
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 14px;
+  background: var(--n-1);
+  border-bottom: 1px solid var(--line);
+  font-size: 12px; color: var(--t-4);
+}
+.ex-chrome-project { color: var(--t-2); font-weight: 550; font-size: 13px; }
+.ex-chrome-rooms { display: flex; gap: 2px; padding: 2px; background: var(--n-2); border-radius: var(--r); border: 1px solid var(--line); }
+.ex-chrome-rooms span { padding: 3px 10px; border-radius: var(--r-sm); font-size: 11.5px; }
+.ex-chrome-rooms span.is-on { background: var(--n-4); color: var(--t-2); }
+.ex-chrome-right { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 11.5px; }
+.ex-chrome-needs { padding: 3px 9px; border-radius: 99px; border: 1px solid var(--signal-line); color: var(--signal); background: var(--signal-dim); }
+.ex-chrome-bolt {
+  display: flex; align-items: center; gap: 6px;
+  padding: 3px 9px; border-radius: var(--r);
+  color: var(--t-4);
+}
+.ex-chrome-bolt.is-on { background: var(--n-4); color: var(--t-1); }
+
+/* The board, drawn behind the sidecar so the trade-off is visible: what you
+   keep by not leaving the room, and how little of the panel is left. */
+.ex-behind {
+  flex: 1; min-width: 0; display: flex; gap: 10px;
+  padding: 14px; opacity: 0.4; overflow: hidden;
+}
+.ex-behind-col { flex: 1; display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.ex-behind-head { font-size: 11px; color: var(--t-4); padding-bottom: 3px; border-bottom: 1px solid var(--line); }
+.ex-behind-card { height: 62px; border-radius: var(--r); background: var(--n-1); border: 1px solid var(--line); }
+
+.ex-side {
+  flex: none; width: 392px;
+  display: flex; flex-direction: column;
+  border-left: 1px solid var(--line);
+  background: var(--n-2);
+  container-type: inline-size;
+}
+.ex-side > * { flex: 1; min-height: 0; }
+
+/* The four stay on one row as long as they can: the picker's whole job is
+   comparing them, and a thumbnail pushed below the fold compares nothing. */
+@media (max-width: 1280px) {
+  /* The bar has four combinations, four priors and two placements in it.
+     The priors are the first thing to go: they are for comparison, and the
+     picker is where comparing is done. */
+  .ex-bar-seg.is-prior { display: none; }
+}
+@media (max-width: 1160px) {
+  .ex-pick { padding: 28px 26px 0; }
+  .ex-detail { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .ex-side { width: 352px; }
+}
+@media (max-width: 880px) {
+  .ex-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

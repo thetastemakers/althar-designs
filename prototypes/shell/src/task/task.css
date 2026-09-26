@@ -1,0 +1,634 @@
+/* The task view. One shell, two faces, two expansions.
+
+   Brass appears in exactly one situation on this screen: work has stopped
+   and will not move until you answer. Not "a human is involved", not "a rule
+   fired", not "something is interesting". Everything else is the neutral
+   ramp, which is what keeps the brass worth looking at. */
+
+/* ---- Shell --------------------------------------------------------------
+   The task takes the whole window. No project chrome, one way out. */
+.tv-win {
+  position: absolute; inset: 0; z-index: 40;
+  display: flex; flex-direction: column;
+  background: var(--n-0);
+  animation: tv-open var(--base) var(--ease);
+}
+@keyframes tv-open { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+.tv-bar-top {
+  height: 44px; flex: none;
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--line);
+}
+.tv-bar-ref { font-size: 11.5px; color: var(--t-4); }
+.tv-bar-t { font-size: 12.5px; color: var(--t-2); }
+.tv-bar-out {
+  display: flex; align-items: center; gap: 7px;
+  height: 26px; margin-left: 6px; padding: 0 8px 0 7px; border-radius: var(--r);
+  font-size: 12px; font-weight: 500; color: var(--t-2);
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.tv-bar-out:hover { color: var(--t-1); background: var(--n-4); }
+.tv-bar-back { transform: scaleX(-1); }
+.tv-bar-out .kbd { margin-left: 2px; }
+.tv-bar-sep { color: var(--t-4); font-size: 12px; margin: 0 -4px; }
+
+.tv {
+  flex: 1; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column;
+  background: var(--n-2);
+  container-type: inline-size;
+}
+.tv-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+.tv-measure { width: 100%; max-width: 720px; margin: 0 auto; padding: 0 28px; }
+.tv-measure.is-wide { max-width: 860px; }
+
+/* ---- Head ---------------------------------------------------------------*/
+.tv-head { flex: none; padding: 26px 0 0; border-bottom: 1px solid var(--line); }
+.tv-title-line { display: flex; align-items: baseline; gap: 10px; }
+.tv-ref { font-size: 12px; color: var(--t-4); }
+.tv-head h1 { margin: 0; font-size: 18px; font-weight: 550; letter-spacing: -0.015em; color: var(--t-1); }
+.tv-state {
+  margin-left: auto; flex: none; padding: 3px 9px; border-radius: 99px;
+  border: 1px solid var(--line-2); background: var(--n-1);
+  font-size: 11px; color: var(--t-3); white-space: nowrap;
+}
+.tv-state.is-held { color: var(--signal); background: var(--signal-dim); border-color: var(--signal-line); }
+
+.tv-meta { display: flex; align-items: center; flex-wrap: wrap; margin: 7px 0 0; font-size: 12px; color: var(--t-4); }
+.tv-meta i { width: 2px; height: 2px; border-radius: 99px; background: var(--n-5); margin: 0 8px; }
+
+.tv-bar { display: flex; gap: 3px; margin: 16px 0 0; }
+.tv-bar i { flex: 1; height: 2px; border-radius: 99px; background: var(--track); }
+.tv-bar i.is-done { background: var(--track-done); }
+.tv-bar i.is-running { background: var(--live); }
+.tv-bar i.is-held { background: var(--signal-line); }
+
+/* The face switch. A default, never a rule: the state opens one of them and
+   you overrule it in either direction, at any point in the task's life. */
+.tv-faces { display: flex; align-items: center; gap: 10px; padding: 14px 0 12px; }
+.tv-seg { display: flex; align-items: center; gap: 1px; padding: 2px; background: var(--n-1); border: 1px solid var(--line); border-radius: var(--r); }
+.tv-seg-b {
+  height: 23px; padding: 0 12px; border-radius: var(--r-sm);
+  font-size: 12px; color: var(--t-3);
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.tv-seg-b:hover { color: var(--t-2); }
+.tv-seg-b.is-on { color: var(--t-1); background: var(--n-4); }
+.tv-seg-b { display: inline-flex; align-items: center; gap: 7px; }
+.tv-seg-b .kbd { opacity: 0.8; }
+.tv-faces-none { margin: 0; font-size: 12px; color: var(--t-4); }
+
+.tv-expands { margin-left: auto; display: flex; gap: 4px; }
+.tv-expand {
+  display: flex; align-items: center; gap: 7px;
+  height: 27px; padding: 0 10px; border-radius: var(--r);
+  border: 1px solid transparent;
+  font-size: 12px; color: var(--t-4);
+  transition: color var(--fast) var(--ease), border-color var(--fast) var(--ease);
+}
+.tv-expand svg { color: var(--t-4); }
+.tv-expand:hover { color: var(--t-2); border-color: var(--line); }
+.tv-expand.is-on { color: var(--t-1); border-color: var(--line-2); background: var(--n-1); }
+
+/* ---- Conversation -------------------------------------------------------*/
+.tv-lede { margin: 22px 0 4px; font-size: 14px; line-height: 1.6; color: var(--t-2); }
+.tv-close { margin: 24px 0 36px; font-size: 13px; line-height: 1.6; color: var(--t-3); }
+
+.tv-msg { padding: 26px 0 0; }
+.tv-you.is-first { margin-top: 26px; }
+.tv-msg-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.tv-msg-who { font-size: 12px; font-weight: 550; color: var(--t-3); }
+.tv-msg.is-you .tv-msg-who { color: var(--t-2); }
+.tv-msg-at { font-size: 11px; color: var(--t-4); }
+.tv-msg-body { margin: 0 0 9px; font-size: 13.5px; line-height: 1.62; color: var(--t-2); }
+.tv-msg.is-you { padding-left: 13px; border-left: 1px solid var(--line-2); }
+.tv-msg.is-you .tv-msg-body { color: var(--t-3); }
+.tv-msg.is-thinking .tv-msg-body { color: var(--t-3); }
+
+.tv-inserted {
+  margin: 10px 0 0; padding-left: 11px;
+  border-left: 1px solid var(--line-3);
+  font-size: 12.5px; line-height: 1.6; color: var(--t-3);
+}
+
+.tv-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.tv-chip {
+  padding: 4px 9px; border-radius: 99px;
+  border: 1px solid var(--line); background: var(--n-1);
+  font-size: 11.5px; color: var(--t-3);
+}
+
+.tv-subs { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 11px 0 0; }
+.tv-subs .tv-sub {
+  display: flex; align-items: baseline; gap: 7px;
+  padding: 4px 9px; border-radius: var(--r-sm);
+  border: 1px solid var(--line); background: var(--n-1);
+  font-size: 11px; color: var(--t-2);
+}
+.tv-subs .tv-sub span:last-child { color: var(--t-4); }
+.tv-sub-note { font-size: 11.5px; color: var(--t-4); }
+
+.tv-composer-wrap { flex: none; padding: 12px 0 20px; background: var(--n-2); }
+.tv-send {
+  width: 24px; height: 24px; flex: none; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--n-5); color: var(--t-1);
+}
+
+/* ---- Findings -----------------------------------------------------------*/
+.tv-findings { margin-top: 12px; border-top: 1px solid var(--line); }
+.tv-finding { border-bottom: 1px solid var(--line); }
+.tv-finding-head { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 2px; }
+.tv-sev {
+  flex: none; padding: 2px 7px; border-radius: var(--r-sm);
+  background: var(--n-3); color: var(--t-3);
+  font-size: 10px; letter-spacing: 0.02em;
+}
+.tv-sev.is-high { color: var(--t-1); background: var(--n-5); }
+.tv-finding-t { flex: 1; font-size: 12.5px; color: var(--t-2); text-align: left; }
+.tv-finding-state { font-size: 11px; color: var(--t-4); }
+.tv-caret { color: var(--t-4); transition: transform var(--fast) var(--ease); }
+.tv-finding.is-open .tv-caret { transform: rotate(180deg); }
+.tv-finding-body { margin: 0 0 11px; padding-right: 30px; font-size: 12.5px; line-height: 1.6; color: var(--t-3); }
+
+/* ---- What the task wants from you ---------------------------------------
+   is-blocking gets the brass edge, because the work is stopped. is-offer
+   does not, because nothing is waiting on it. */
+.tv-ask {
+  margin: 12px 0 4px; padding: 14px 16px;
+  border: 1px solid var(--line); border-radius: var(--r);
+  background: var(--n-1);
+}
+.tv-ask.is-blocking { border-color: var(--signal-line); }
+.tv-ask.is-recorded { border-color: var(--line-2); background: var(--n-3); box-shadow: none; }
+.tv-ask-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.tv-ask-kind { font-size: 11px; font-weight: 550; color: var(--t-3); letter-spacing: 0.02em; }
+.tv-ask.is-blocking .tv-ask-kind { color: var(--signal); }
+.tv-ask-raised { font-size: 11px; color: var(--t-4); margin-left: auto; }
+.tv-ask-title { margin: 0 0 6px; font-size: 14px; font-weight: 500; color: var(--t-1); }
+.tv-ask-because { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--t-3); }
+
+.tv-options { display: flex; flex-direction: column; gap: 6px; margin: 14px 0; }
+.tv-option {
+  display: flex; align-items: flex-start; gap: 10px; text-align: left;
+  padding: 10px 12px; border-radius: var(--r-sm);
+  border: 1px solid var(--line); background: var(--n-2);
+  transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.tv-option:hover { border-color: var(--line-3); }
+.tv-option.is-on { border-color: var(--signal); background: var(--sunk); }
+.tv-ask.is-offer .tv-option.is-on { border-color: var(--t-3); }
+.tv-option-mark {
+  flex: none; width: 13px; height: 13px; margin-top: 2px;
+  border-radius: 99px; border: 1px solid var(--line-3);
+  transition: box-shadow var(--fast) var(--ease), border-color var(--fast) var(--ease);
+}
+.tv-option.is-on .tv-option-mark { border-color: var(--signal); box-shadow: inset 0 0 0 3px var(--signal); }
+.tv-ask.is-offer .tv-option.is-on .tv-option-mark { border-color: var(--t-2); box-shadow: inset 0 0 0 3px var(--t-2); }
+.tv-option-body { display: flex; flex-direction: column; gap: 3px; }
+.tv-option-label { font-size: 12.5px; color: var(--t-1); }
+.tv-option-note { font-size: 11.5px; line-height: 1.5; color: var(--t-3); }
+
+.tv-dec-ev { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+.tv-dec-ev .eyebrow { margin-bottom: 4px; }
+.tv-dec-ev p { margin: 0; font-size: 11.5px; line-height: 1.5; color: var(--t-3); }
+
+.tv-record {
+  height: 28px; padding: 0 14px; border-radius: var(--r-sm);
+  background: var(--signal); color: var(--on-signal);
+  font-size: 12px; font-weight: 550;
+  transition: background var(--fast) var(--ease);
+}
+.tv-record:hover:not(:disabled) { background: var(--signal-bright); }
+.tv-record:disabled { background: var(--n-4); color: var(--t-4); }
+.tv-ask.is-offer .tv-record { background: var(--n-5); color: var(--t-1); font-weight: 450; }
+.tv-ask.is-offer .tv-record:hover:not(:disabled) { background: var(--n-4); }
+.tv-ask.is-offer .tv-record:disabled { background: var(--n-3); color: var(--t-4); }
+
+/* ---- Spikes -------------------------------------------------------------*/
+.tv-spike {
+  display: flex; flex-direction: column; gap: 3px;
+  margin: 11px 0 0; padding: 11px 13px;
+  border: 1px solid var(--line); border-radius: var(--r);
+  background: var(--n-1);
+}
+.tv-spike-head { display: flex; align-items: baseline; gap: 10px; }
+.tv-spike-label { flex: 1; font-size: 13px; color: var(--t-1); }
+.tv-spike-verdict {
+  flex: none; padding: 2px 8px; border-radius: 99px;
+  border: 1px solid var(--line-2); background: var(--n-2);
+  font-size: 10.5px; color: var(--t-3);
+}
+.tv-spike.is-discarded { opacity: 0.72; }
+.tv-spike.is-discarded .tv-spike-label { color: var(--t-3); }
+.tv-spike.is-running .tv-spike-verdict { color: var(--live); border-color: var(--line-3); }
+.tv-spike-branch { font-size: 11px; color: var(--t-4); }
+.tv-spike-why { margin: 4px 0 0; font-size: 12px; line-height: 1.55; color: var(--t-3); }
+
+/* ---- Knowledge ----------------------------------------------------------*/
+.tv-krows { margin-top: 10px; border-top: 1px solid var(--line); }
+.tv-krow { display: flex; flex-direction: column; gap: 2px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.tv-krow-t { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--t-2); }
+.tv-krow-m { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--t-4); }
+.tv-krow-flag { font-size: 11.5px; color: var(--signal); margin-top: 3px; }
+
+/* ---- Outcome ------------------------------------------------------------*/
+.tv-outcome {
+  display: flex; align-items: baseline; gap: 11px;
+  margin: 12px 0 0; padding: 11px 14px;
+  border: 1px solid var(--line-2); border-radius: var(--r); background: var(--n-1);
+}
+.tv-outcome.is-top { margin: 22px 0 0; }
+.tv-outcome-verdict { font-size: 13px; font-weight: 550; color: var(--t-1); }
+.tv-outcome-pr { font-size: 12px; color: var(--t-3); }
+.tv-outcome-meta { font-size: 11.5px; color: var(--t-4); margin-left: auto; }
+
+/* ---- Outputs ------------------------------------------------------------*/
+.tv-out { margin-top: 26px; }
+.tv-out-head { display: flex; align-items: baseline; gap: 8px; margin: 0 0 8px; }
+.tv-out-meta { font-size: 11px; color: var(--t-4); }
+.tv-out-card {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  padding: 12px 14px; border-radius: var(--r);
+  border: 1px solid var(--line); background: var(--n-1);
+  transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.tv-out-card:hover:not(.is-static) { border-color: var(--line-3); background: var(--n-4); }
+.tv-out-card.is-static { cursor: default; }
+.tv-out-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.tv-out-t { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--t-1); }
+.tv-out-t svg { color: var(--t-4); }
+.tv-out-sub { font-size: 11.5px; color: var(--t-4); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tv-out-go { margin-left: auto; display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--t-3); flex: none; }
+.tv-out-note { margin: 8px 0 0; font-size: 11.5px; color: var(--t-4); }
+.tv-out-empty {
+  margin: 0; padding: 12px 14px;
+  border: 1px dashed var(--line-2); border-radius: var(--r);
+  font-size: 12.5px; line-height: 1.55; color: var(--t-4);
+}
+
+/* ---- The pull request ---------------------------------------------------
+   The one thing on the outputs page that leaves Charrette, so it is drawn as
+   the object it becomes: GitHub's number and branch, Charrette's checks. */
+.pr {
+  margin-top: 28px; overflow: hidden;
+  background: #fff; border: 1px solid var(--line-2); border-radius: 12px;
+  box-shadow: var(--lift);
+}
+.pr-gh-mark { color: var(--t-1); }
+.pr-repo { color: var(--t-1); font-weight: 600; }
+.pr-repo span { color: var(--t-3); font-weight: 400; }
+.pr-num { font: 500 12px/1 var(--mono); color: var(--t-3); }
+.pr-gh {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 6px;
+  height: 26px; padding: 0 9px; border-radius: 6px;
+  font-size: 12px; font-weight: 500; color: var(--t-2); text-decoration: none;
+  box-shadow: inset 0 0 0 1px var(--line-2); background: #fff;
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.pr-gh:hover { color: var(--t-1); background: var(--n-2); }
+
+.pr-body { padding: 18px 20px 16px; }
+.pr-status-line { display: flex; align-items: center; gap: 10px; }
+.pr-status {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 24px; padding: 0 10px 0 8px; border-radius: 99px;
+  font-size: 12px; font-weight: 600;
+}
+.pr-status.is-draft { background: var(--n-4); color: var(--t-2); }
+.pr-status.is-merged { background: var(--ok); color: #fff; }
+.pr-status.is-open { background: var(--t-1); color: #fff; }
+.pr-note { font-size: 12px; color: var(--t-3); }
+.pr-title {
+  margin: 12px 0 0;
+  font-size: 22px; line-height: 1.25; font-weight: 650; letter-spacing: -0.022em;
+  color: var(--t-1); text-wrap: balance;
+}
+.pr-branch { display: flex; align-items: center; gap: 7px; margin-top: 11px; color: var(--t-4); }
+.pr-ref {
+  padding: 4px 7px; border-radius: 5px;
+  background: var(--n-2); box-shadow: inset 0 0 0 1px var(--line);
+  font: 500 11.5px/1 var(--mono); color: var(--t-2);
+}
+/* Charrette's branch in Charrette's colour, going into yours */
+.pr-ref:first-child { background: var(--live-dim); box-shadow: none; color: var(--live); }
+.pr-commits { margin-left: 5px; font-size: 12px; color: var(--t-3); }
+.pr-by {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px;
+  margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line);
+  font-size: 12.5px;
+}
+.pr-by-i { display: inline-flex; align-items: center; gap: 7px; }
+.pr-by-k { color: var(--t-3); }
+.pr-by .model { font-weight: 550; color: var(--t-1); }
+.pr-warn { margin-left: auto; font-size: 11.5px; color: var(--t-3); }
+.pr-warn::before { content: '!'; display: inline-grid; place-items: center; width: 14px; height: 14px; margin-right: 6px; border-radius: 99px; background: var(--n-4); font: 600 9.5px/1 var(--mono); color: var(--t-2); }
+
+.pr-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); border-top: 1px solid var(--line); }
+.pr-sec { min-width: 0; padding: 14px 20px 16px; }
+.pr-sec + .pr-sec { border-left: 1px solid var(--line); }
+.pr-sub { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--t-1); }
+.pr-sub-n {
+  padding: 2px 6px; border-radius: 99px; background: var(--n-2);
+  font: 500 10.5px/1.2 var(--mono); color: var(--t-3);
+}
+.pr-sum {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 7px;
+  font-size: 11.5px; font-weight: 500; color: var(--t-3); font-variant-numeric: tabular-nums;
+}
+.pr-add, .pr-del { font: 600 11px/1 var(--mono); }
+.pr-add { color: var(--ok); }
+.pr-del { color: var(--danger); }
+.pr-stat { display: inline-flex; gap: 2px; }
+.pr-stat i { width: 8px; height: 8px; border-radius: 2px; background: var(--danger); }
+.pr-stat i.is-add { background: var(--ok); }
+
+.pr-files { list-style: none; margin: 0 -8px; padding: 0; }
+
+/* one pull request inside the change set */
+.pr-one + .pr-one { margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
+.pr-one-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 12.5px; }
+.pr-order {
+  display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 99px;
+  box-shadow: inset 0 0 0 1px var(--line-3); font: 500 10px/1 var(--mono); color: var(--t-3);
+}
+.pr-one-head .pr-gh { height: 22px; padding: 0 7px; font-size: 11.5px; gap: 5px; }
+.pr-after { display: flex; align-items: center; gap: 6px; margin: 2px 0 4px; font-size: 11.5px; color: var(--t-3); }
+.pr-file {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto 52px; align-items: center; gap: 12px;
+  width: 100%; padding: 7px 8px; border-radius: 6px; text-align: left;
+  transition: background var(--fast) var(--ease);
+}
+.pr-file:hover { background: var(--n-2); }
+.pr-path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 12px/1.3 var(--mono); color: var(--t-1); }
+.pr-dir { color: var(--t-4); }
+.pr-n { display: inline-flex; gap: 6px; }
+.pr-bar { display: flex; height: 5px; border-radius: 99px; background: var(--track); overflow: hidden; }
+.pr-bar i {
+  display: block; width: calc(var(--w) * 100%); height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, var(--ok) 0 calc(var(--a) * 100%), var(--danger) calc(var(--a) * 100%));
+}
+
+.pr-checks { list-style: none; margin: 0; padding: 0; }
+.pr-check { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; }
+.pr-check + .pr-check { border-top: 1px solid var(--line); }
+.pr-mark { flex: none; display: grid; place-items: center; width: 16px; height: 16px; margin-top: 1px; border-radius: 99px; }
+.pr-mark.is-pass { background: var(--n-4); color: var(--t-1); }
+.pr-mark.is-queued { box-shadow: inset 0 0 0 1.5px var(--n-5); }
+.is-running > .pr-mark { background: var(--live-dim); }
+.is-running > .pr-mark .pulse { width: 7px; height: 7px; }
+.is-held > .pr-mark { background: var(--signal-dim); }
+.is-held > .pr-mark .dot-signal { width: 6px; height: 6px; }
+.pr-check-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pr-check-name { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 12.5px; font-weight: 550; color: var(--t-1); }
+.pr-check-name .model { font-size: 11.5px; font-weight: 400; color: var(--t-2); }
+.pr-rule {
+  display: inline-flex; align-items: center; gap: 3px; height: 17px; padding: 0 6px 0 4px;
+  border-radius: 99px; box-shadow: inset 0 0 0 1px var(--line-2);
+  font-size: 10.5px; font-weight: 500; color: var(--t-3);
+}
+.pr-check-d { font-size: 11.5px; color: var(--t-3); }
+.pr-check.is-running .pr-check-d { color: var(--live); }
+.pr-check.is-held .pr-check-d { color: var(--signal-bright); }
+.pr-check.is-queued .pr-check-name { color: var(--t-3); }
+
+.pr-foot {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 20px; border-top: 1px solid var(--line); background: var(--n-3);
+}
+.pr-btn {
+  display: inline-flex; align-items: center; gap: 9px; flex: none;
+  height: 30px; padding: 0 8px 0 13px; border-radius: 7px;
+  background: var(--t-1); color: #fff; font-size: 12.5px; font-weight: 550;
+  transition: background var(--fast) var(--ease);
+}
+.pr-btn:hover { background: #2a2a30; }
+.pr-btn .kbd { background: rgba(255, 255, 255, 0.14); border-color: transparent; color: rgba(255, 255, 255, 0.75); box-shadow: none; }
+.pr-foot-meta { font-size: 11.5px; color: var(--t-3); }
+.pr-btn.is-quiet { background: #fff; color: var(--t-1); box-shadow: inset 0 0 0 1px var(--line-3); padding: 0 12px; }
+.pr-btn.is-quiet:hover { background: var(--n-2); }
+.pr-link {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--t-2);
+}
+.pr-link:hover { color: var(--t-1); }
+.pr-back { flex: 1; display: flex; align-items: center; gap: 8px; }
+.pr-back input {
+  flex: 1; height: 30px; padding: 0 11px; border-radius: 7px;
+  background: #fff; box-shadow: inset 0 0 0 1px var(--line-3); font-size: 12.5px;
+}
+
+@media (max-width: 900px) {
+  .pr-grid { grid-template-columns: minmax(0, 1fr); }
+  .pr-sec + .pr-sec { border-left: 0; border-top: 1px solid var(--line); }
+  .pr-warn { margin-left: 0; }
+}
+
+/* ---- An artifact, drawn as the document it is ----------------------------*/
+.art-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px;
+  background: #fff; border: 1px solid var(--line-2); border-radius: 10px;
+  box-shadow: var(--lift);
+}
+.art-sheet {
+  flex: none; display: grid; place-items: center;
+  width: 40px; height: 48px; border-radius: 4px 10px 4px 4px;
+  background: var(--n-2); box-shadow: inset 0 0 0 1px var(--line-2);
+  color: var(--t-2);
+}
+.art-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.art-kind { font: 500 10.5px/1.2 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--t-3); }
+.art-t { font-size: 14.5px; font-weight: 600; letter-spacing: -0.01em; color: var(--t-1); }
+.art-meta { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--t-3); }
+.art-meta .model { color: var(--t-2); }
+.art-sev { margin-left: auto; display: flex; gap: 5px; flex: none; }
+
+/* ---- Graph, as an expansion ---------------------------------------------
+   The apparatus, when you want it. Nothing here is brass: a rule inserting a
+   step is structural, and nobody is being asked for anything. */
+.tv-graph { flex: 1; min-height: 0; display: flex; flex-direction: column; animation: tv-in var(--base) var(--ease); }
+@keyframes tv-in { from { opacity: 0; } to { opacity: 1; } }
+.tv-graph-head {
+  flex: none; display: flex; align-items: center; gap: 12px;
+  padding: 11px 22px; border-bottom: 1px solid var(--line);
+}
+.tv-graph-count { font-size: 11.5px; color: var(--t-4); }
+.tv-graph-close { margin-left: auto; color: var(--t-4); }
+.tv-graph-close:hover { color: var(--t-2); }
+.tv-graph-body { flex: 1; min-height: 0; display: flex; }
+
+.tv-graph-head .tv-legend { display: flex; align-items: center; gap: 14px; margin-left: auto; font-size: 11px; color: var(--t-3); }
+.tv-legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.tv-legend-rule { width: 7px; height: 7px; transform: rotate(45deg); border-radius: 1.5px; box-shadow: inset 0 0 0 1.4px var(--t-3); }
+.tv-graph-head .tv-graph-close { margin-left: 8px; }
+
+/* the canvas: a faint dot grid, so it reads as a plane and not a page */
+.tv-canvas-scroll {
+  flex: 1; min-width: 0; min-height: 0; overflow: auto;
+  display: flex; align-items: safe center; justify-content: safe center;
+  background-image: radial-gradient(circle, rgba(20, 20, 28, 0.09) 1px, transparent 1.2px);
+  background-size: 18px 18px;
+}
+.tv-canvas-fit { position: relative; flex: none; }
+.tv-canvas-plane { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+.tv-wires { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+.tv-wire { fill: none; stroke: var(--wire); stroke-width: 1.5; }
+.tv-wire.is-done { stroke: var(--t-3); }
+.tv-wire.is-sub { stroke: var(--n-5); stroke-width: 1.2; stroke-dasharray: 3 3; }
+.tv-wire.is-loop { stroke: var(--t-3); stroke-width: 1.3; stroke-dasharray: 4 3; }
+
+.tv-node {
+  position: absolute; display: flex; flex-direction: column; gap: 5px;
+  align-items: stretch; text-align: left;
+  padding: 10px 12px 10px; border-radius: 10px;
+  border: 1px solid var(--line-2); background: #fff; box-shadow: var(--lift);
+  transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease), box-shadow var(--fast) var(--ease);
+}
+.tv-node:hover { border-color: var(--line-3); box-shadow: var(--lift-2); }
+.tv-node.is-sel { box-shadow: 0 0 0 1.5px var(--t-1), var(--lift); border-color: transparent; }
+.tv-node.is-running { border-color: var(--live); box-shadow: 0 0 0 3px var(--live-dim); }
+.tv-node.is-running.is-sel { box-shadow: 0 0 0 1.5px var(--live), 0 0 0 4px var(--live-dim); }
+.tv-node.is-queued { background: rgba(255, 255, 255, 0.4); border-style: dashed; box-shadow: none; }
+.tv-node.is-held { border-color: var(--signal); background: var(--signal-paper); box-shadow: none; }
+.tv-node-top { display: flex; align-items: center; gap: 7px; }
+.tv-node-n { font: 500 10.5px/1 var(--mono); color: var(--t-4); }
+.tv-node-when { margin-left: auto; font-size: 11px; color: var(--t-3); font-variant-numeric: tabular-nums; }
+.tv-node.is-running .tv-node-when { color: var(--live); font-weight: 550; }
+.tv-node-label { font-size: 13.5px; font-weight: 600; letter-spacing: -0.01em; color: var(--t-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tv-node.is-queued .tv-node-label { color: var(--t-3); font-weight: 550; }
+.tv-node-who { display: flex; align-items: center; gap: 7px; margin-top: auto; font-size: 11.5px; color: var(--t-2); min-width: 0; }
+.tv-node-who .model { color: var(--t-2); }
+.tv-node.is-queued .tv-node-who, .tv-node.is-queued .tv-node-who .model { color: var(--t-3); }
+/* a step your rule added carries the rule's mark, not a caption beneath it */
+.tv-node-rule {
+  display: inline-flex; align-items: center; gap: 4px; margin-left: auto;
+  height: 17px; padding: 0 6px; border-radius: 99px;
+  box-shadow: inset 0 0 0 1px var(--line-2); font-size: 10.5px; color: var(--t-3);
+}
+.tv-node.is-added .tv-node-rule::before { content: ''; width: 5px; height: 5px; transform: rotate(45deg); border-radius: 1px; background: var(--t-3); }
+.tv-coord { display: inline-flex; align-items: center; gap: 6px; }
+.tv-coord::before { content: ''; width: 7px; height: 7px; border-radius: 2px; background: var(--bot); }
+
+.tv-subnode {
+  position: absolute; display: flex; align-items: center; gap: 8px; height: 30px;
+  padding: 0 11px; border-radius: 7px;
+  border: 1px solid var(--line-2); background: #fff;
+  font-size: 11.5px; color: var(--t-1);
+}
+.tv-subnode-t { margin-left: auto; font-size: 11px; color: var(--t-3); }
+.tv-canvas-caption { position: absolute; font-size: 11px; color: var(--t-3); white-space: nowrap; }
+.tv-loop-tag {
+  position: absolute; transform: translate(-50%, -50%);
+  display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 9px;
+  border-radius: 99px; background: var(--n-2); box-shadow: inset 0 0 0 1px var(--line-2);
+  font-size: 11px; color: var(--t-2); white-space: nowrap;
+}
+
+.tv-panel {
+  flex: none; width: 292px; overflow-y: auto;
+  padding: 18px; border-left: 1px solid var(--line); background: var(--n-1);
+}
+.tv-panel-empty p { margin: 0 0 8px; font-size: 12.5px; line-height: 1.6; color: var(--t-3); }
+.tv-panel-hint { color: var(--t-4) !important; }
+.tv-panel-body { animation: tv-in var(--base) var(--ease); }
+.tv-panel-head { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+.tv-panel-label { font-size: 13.5px; font-weight: 550; color: var(--t-1); }
+.tv-panel-close { margin-left: auto; color: var(--t-4); }
+.tv-panel-close:hover { color: var(--t-2); }
+.tv-panel-meta { margin: 0 0 12px; font-size: 11.5px; color: var(--t-4); }
+.tv-panel-what { margin: 0 0 12px; font-size: 12.5px; line-height: 1.6; color: var(--t-2); }
+.tv-panel .tv-diff.is-inline { max-height: 260px; }
+.tv-panel-n { font: 500 11px/1 var(--mono); color: var(--t-4); }
+.tv-panel-meta { display: flex; align-items: center; gap: 6px; }
+.tv-panel-line { margin: 0 0 18px; font-size: 13px; line-height: 1.55; color: var(--t-1); }
+.tv-panel-label2 { margin: 0 0 8px; }
+.tv-agents { list-style: none; margin: 0 0 20px; padding: 0; }
+.tv-agents li { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 12.5px; color: var(--t-1); border-bottom: 1px solid var(--line); }
+.tv-agents .tv-node-rule { margin-left: 0; }
+.tv-agents-n { margin-left: auto; font-size: 11.5px; color: var(--t-3); }
+.tv-steps { list-style: none; margin: 0; padding: 0; }
+.tv-step { display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 6px; margin: 0 -6px; border-radius: 6px; font-size: 12.5px; text-align: left; }
+.tv-step:hover { background: var(--n-2); }
+.tv-step-l { color: var(--t-1); }
+.tv-step.is-queued .tv-step-l { color: var(--t-3); }
+.tv-step-t { margin-left: auto; font-size: 11.5px; color: var(--t-3); font-variant-numeric: tabular-nums; }
+.tv-step.is-running .tv-step-t { color: var(--live); }
+.tv-panel-cost { margin: 16px 0 0; padding-top: 12px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--t-4); }
+
+/* ---- Diff ---------------------------------------------------------------
+   Additions and deletions are not green and red. The product has exactly one
+   saturated colour and it means "a human is needed"; machine output does not
+   get to borrow it. Changed lines separate by weight and a cool tint. */
+.tv-diff { display: flex; flex-direction: column; min-height: 0; }
+.tv-diff.is-inline {
+  margin: 11px 0 0; border: 1px solid var(--line); border-radius: var(--r);
+  background: var(--n-1); max-height: 340px;
+}
+.tv-diff.is-full { flex: 1; min-height: 0; background: var(--n-2); animation: tv-in var(--base) var(--ease); }
+
+.tv-diff-stub {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  margin: 11px 0 0; padding: 9px 12px;
+  border: 1px solid var(--line); border-radius: var(--r);
+  background: var(--n-1); font-size: 12px; color: var(--t-3);
+}
+.tv-diff-stub:hover { border-color: var(--line-2); color: var(--t-2); }
+.tv-diff-stub-stat { margin-left: auto; color: var(--t-4); font-size: 11.5px; }
+
+.tv-diff-head {
+  flex: none; display: flex; align-items: center; gap: 12px;
+  padding: 9px 14px; border-bottom: 1px solid var(--line);
+}
+.tv-diff.is-full .tv-diff-head { padding: 11px 22px; }
+.tv-diff-branch { font-size: 11.5px; color: var(--t-2); }
+.tv-diff-stat { font-size: 11.5px; color: var(--t-4); }
+.tv-diff-act { margin-left: auto; font-size: 11.5px; color: var(--t-4); }
+.tv-diff-act:hover { color: var(--t-2); }
+.tv-diff-act + .tv-diff-act { margin-left: 0; }
+.tv-diff-close { color: var(--t-4); }
+
+.tv-diff-body { flex: 1; min-height: 0; display: flex; }
+.tv-diff-files {
+  flex: none; width: 232px; overflow-y: auto;
+  padding: 8px; border-right: 1px solid var(--line);
+}
+.tv-diff.is-inline .tv-diff-files { width: 200px; }
+.tv-file {
+  display: flex; flex-direction: column; gap: 2px; width: 100%;
+  padding: 6px 8px; border-radius: var(--r-sm);
+}
+.tv-file:hover { background: var(--n-3); }
+.tv-file.is-on { background: var(--n-4); }
+.tv-file-path { font-size: 11px; color: var(--t-2); overflow: hidden; text-overflow: ellipsis; direction: rtl; text-align: left; }
+.tv-file-stat { display: flex; gap: 7px; font-size: 10.5px; }
+.tv-file-stat .is-add { color: var(--live); font-style: normal; }
+.tv-file-stat .is-del { color: var(--t-4); font-style: normal; }
+
+.tv-diff-code { flex: 1; min-width: 0; overflow: auto; padding: 8px 0 24px; animation: tv-in var(--fast) var(--ease); }
+.tv-diff-none { margin: 12px 16px; font-size: 12px; color: var(--t-4); }
+.tv-hunk { margin-bottom: 14px; }
+.tv-hunk-at { padding: 4px 14px; font-size: 10.5px; color: var(--t-4); background: var(--n-1); border-block: 1px solid var(--line); }
+.tv-line { display: flex; font-size: 11.5px; line-height: 1.75; white-space: pre; }
+.tv-line-sign { flex: none; width: 22px; text-align: center; color: var(--t-4); }
+.tv-line-text { flex: 1; padding-right: 16px; }
+.tv-line.is-ctx { color: var(--t-3); }
+.tv-line.is-add { background: var(--add); color: var(--t-1); }
+.tv-line.is-add .tv-line-sign { color: var(--live); }
+.tv-line.is-del { background: var(--del); color: var(--t-4); }
+
+/* ---- Narrow -------------------------------------------------------------*/
+@container (max-width: 780px) {
+  .tv-measure { padding: 0 18px; }
+  .tv-head h1 { font-size: 15px; }
+  .tv-title-line { flex-wrap: wrap; }
+  .tv-state { margin-left: 0; }
+  .tv-faces { flex-wrap: wrap; gap: 8px; }
+  .tv-expands { margin-left: 0; }
+  .tv-panel { display: none; }
+  .tv-graph-head { padding: 11px 18px; }
+  .tv-diff-body { flex-direction: column; }
+  .tv-diff-files { width: auto !important; max-height: 116px; border-right: 0; border-bottom: 1px solid var(--line); }
+}

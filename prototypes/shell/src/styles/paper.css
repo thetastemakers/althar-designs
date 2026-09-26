@@ -1,0 +1,141 @@
+/* Paper — the shell's clothes.
+   rooms.css and task.css hold the layout; this file holds the finish:
+   type roles, air, hierarchy, and the places where paper needs something
+   the layout files don't say. */
+
+#root { zoom: var(--scale); }
+
+/* Titles and prose take their own families, so a look can set a serif
+   against a sans, or a mono against both. */
+:is(.rm-talk-open-t, .rm-dock-title, .tv-head h1, .tv-ask-title, .tv-panel-label) {
+  font-family: var(--font-display);
+}
+:is(.rm-msg-body, .tv-msg-body, .tv-lede) { font-family: var(--font-prose); }
+.eyebrow { font-family: var(--font-label, var(--font)); }
+
+/* Spacing, restated with --sp so the air can be tuned in one place. At 1
+   every value here is what rooms.css and task.css say. */
+html .rm-measure { max-width: var(--measure); }
+html .tv-measure { max-width: var(--measure); padding: 0 calc(28px * var(--sp)); }
+html .rm-talk-scroll { padding: calc(30px * var(--sp)) calc(32px * var(--sp)) calc(20px * var(--sp)); }
+html .rm-msg { margin-bottom: calc(26px * var(--sp)); }
+html .rm-thread { padding: calc(11px * var(--sp)) calc(13px * var(--sp)); margin-bottom: calc(26px * var(--sp)); }
+
+
+/* ---- Hierarchy ---------------------------------------------------------
+   Four levels, so a conversation never reads as one grey block:
+     who is speaking   bright, weighted, with a mark (square: the coordinator,
+                       round: you)
+     what they said    primary text, a size up
+     what they carry   threads, findings, files and diffs on raised surfaces
+     metadata          dim, and only metadata is dim                        */
+:root { --you-tint: rgba(20, 20, 28, 0.045); --you-bubble: rgba(20, 20, 28, 0.065); --bot: var(--live);
+  --prose-size: 14px; --prose-lh: 1.62; --talk-title: 17px; --task-title: 22px; --lede-size: 15px; }
+
+html .rm-talk-open-t { font-size: var(--talk-title); font-weight: 600; }
+html .tv-head h1 { font-size: var(--task-title); font-weight: var(--title-weight, 600); letter-spacing: -0.02em; }
+html :is(.tv-meta, .rm-talk-open-m) { color: var(--t-3); }
+html .tv-lede { font-size: var(--lede-size); color: var(--t-2); }
+
+/* who */
+html :is(.rm-msg-who, .tv-msg-who) {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12.5px; font-weight: 600; color: var(--t-1); letter-spacing: -0.005em;
+}
+html :is(.rm-msg-who, .tv-msg-who)::before {
+  content: ''; width: 8px; height: 8px; border-radius: 2px; background: var(--bot);
+}
+html :is(.rm-msg.is-you, .tv-msg.is-you) :is(.rm-msg-who, .tv-msg-who)::before {
+  border-radius: 99px; background: var(--t-1);
+}
+html :is(.rm-msg-at, .tv-msg-at) { color: var(--t-4); }
+
+/* what */
+html :is(.rm-msg-body, .rm-msg.is-coordinator .rm-msg-body, .tv-msg-body, .tv-msg.is-you .tv-msg-body) {
+  font-size: var(--prose-size); line-height: var(--prose-lh); color: var(--t-1);
+}
+html .tv-msg.is-thinking .tv-msg-body { color: var(--t-2); }
+
+/* your turns are a short bubble on the right (rooms.css .rm-you) */
+html .tv-msg.is-you { padding: 0; border: 0; }
+
+/* what they carry: raised, so it reads as a thing and not more prose */
+html .rm-thread {
+  background: var(--n-3); border-color: var(--line-2);
+  box-shadow: var(--lift);
+}
+html .rm-thread-title { font-size: 13.5px; font-weight: 550; }
+html .rm-thread-state { color: var(--t-1); font-weight: 500; }
+html :is(.tv-chip, .tv-subs .tv-sub, .tv-diff-stub) {
+  background: var(--n-3); border-color: var(--line-2); color: var(--t-2);
+}
+html .tv-findings {
+  border: 1px solid var(--line-2); border-radius: var(--r-lg); background: var(--n-3); padding: 0 12px;
+}
+html .tv-finding:last-child { border-bottom: 0; }
+html .tv-finding-t { font-size: 13px; color: var(--t-1); }
+html .tv-finding-state { color: var(--t-3); }
+html .tv-inserted { display: flex; align-items: center; gap: 9px; color: var(--t-2); font-size: 13px; }
+html .tv-inserted::before { content: ''; flex: none; width: 6px; height: 6px; transform: rotate(45deg); border-radius: 1px; box-shadow: inset 0 0 0 1.4px var(--t-3); }
+html .tv-close { color: var(--t-2); font-weight: 500; }
+
+/* the brief at the top of the conversation */
+html .rm-brief-label { color: var(--t-3); }
+html .rm-brief-row-t { font-size: 13px; color: var(--t-1); }
+html .rm-brief-row-m { color: var(--t-3); }
+/* the window's own chrome stays a shade of the frame */
+html :is(.rm-chrome, .tv-win) { background: var(--chrome); }
+/* diffs read as diffs: green in, red out, on a white sheet */
+html :is(.tv-line.is-add .tv-line-sign, .tv-file-stat .is-add) { color: var(--ok); }
+html .tv-line.is-del .tv-line-sign { color: var(--danger); }
+html .tv-line.is-del { color: var(--t-3); }
+html .tv-diff-code { background: var(--n-1); }
+html .tv-hunk-at { background: var(--n-2); }
+/* a choice you are being asked to make is the loudest thing in the dock */
+html :is(.rm-opt, .tv-option):not(.is-on) { background: #ffffff; border-color: var(--line-2); box-shadow: var(--lift); }
+html :is(.rm-opt, .tv-option):hover { border-color: var(--signal-line); }
+html :is(.rm-opt-label, .tv-option-label) { font-weight: 500; }
+html .rm-opt-mark { border-color: var(--t-4); }
+html .eyebrow { letter-spacing: 0.08em; font-weight: 500; }
+/* on paper, raised means lighter: cards and the composer sit above the page */
+html .rm-thread { box-shadow: var(--lift); }
+html .rm-thread:hover { background: #ffffff; }
+html .tv-measure.is-wide { max-width: calc(var(--measure) + 140px); }
+
+
+/* ---- Model marks -------------------------------------------------------*/
+.model { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--t-2); white-space: nowrap; vertical-align: -2px; }
+.mk { flex: none; fill: currentColor; }
+/* inside a graph node the model is part of the node's text, and fades with it */
+.tv-node .model { color: inherit; font-size: inherit; }
+
+
+
+
+/* ---- Inside a task: the lead agent speaks, the coordinator handed over ---*/
+html .tv-msg-who.is-agent::before { display: none; }
+html .tv-msg-who.is-agent .model { gap: 6px; font-weight: 600; color: var(--t-1); }
+.tv-handoff {
+  margin-top: 18px; padding: 12px 14px 12px;
+  border-radius: var(--r-lg); background: var(--n-3); box-shadow: inset 0 0 0 1px var(--line);
+}
+.tv-handoff-head { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--t-3); }
+.tv-handoff-head > svg { color: var(--t-4); }
+.tv-handoff-who { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; color: var(--t-2); }
+.tv-handoff-who::before { content: ''; width: 7px; height: 7px; border-radius: 2px; background: var(--bot); }
+.tv-handoff-head .model { font-weight: 550; color: var(--t-1); }
+.tv-handoff-role { font-size: 11px; color: var(--t-4); }
+.tv-handoff-head .tv-msg-at { margin-left: auto; font-size: 11.5px; }
+.tv-handoff-body { margin: 6px 0 0; font-size: 13px; line-height: 1.5; color: var(--t-2); }
+.tv-handoff .tv-chips { margin-top: 10px; }
+.tv-swap {
+  display: flex; align-items: center; gap: 7px; margin: 22px 0 4px;
+  font-size: 12px; color: var(--t-3);
+}
+.tv-swap::before, .tv-swap::after { content: ''; height: 1px; background: var(--line-2); }
+.tv-swap::before { width: 24px; }
+.tv-swap::after { flex: 1; }
+.tv-swap .model { font-weight: 550; color: var(--t-1); }
+.tv-swap-note { color: var(--t-4); }
+.tv-cost { font-variant-numeric: tabular-nums; color: var(--t-4); }
+.tv-meta .model { color: var(--t-2); }

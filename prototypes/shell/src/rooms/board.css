@@ -1,0 +1,211 @@
+/* The board — four columns in the order work moves, four kinds of object.
+   Violet is only ever a person's call; cobalt is only ever work in motion. */
+
+.bd { flex: 1; min-width: 0; min-height: 0; display: flex; }
+.bd-cols {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(240px, 500px));
+  justify-content: center;
+  overflow-x: auto;
+}
+/* on a big screen the columns stop growing and the board sits centred,
+   like the conversation's measure, instead of stretching cards thin */
+.bd-col { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--n-2); border-left: 1px solid var(--line); }
+.bd-col:last-child { border-right: 1px solid var(--line); }
+/* the column that is waiting on you is washed, faintly, in its own colour */
+.bd-col.is-needs { background: color-mix(in srgb, var(--signal) 3.5%, var(--n-2)); }
+
+/* ---- Column heads ---------------------------------------------------------*/
+.bd-col-head { display: flex; align-items: center; gap: 9px; padding: 20px 20px 0; }
+.bd-col-title { font-size: 13px; font-weight: 600; color: var(--t-1); letter-spacing: -0.01em; }
+.bd-count {
+  margin-left: auto;
+  min-width: 20px; height: 20px; padding: 0 6px;
+  display: inline-grid; place-items: center;
+  border-radius: 99px;
+  background: var(--n-4); color: var(--t-2);
+  font: 500 11px/1 var(--mono); font-variant-numeric: tabular-nums;
+}
+.is-needs .bd-count { background: var(--signal); color: var(--on-signal); }
+
+/* each state has a glyph of its own, drawn rather than borrowed */
+.bd-glyph { flex: none; width: 8px; height: 8px; }
+.is-needs .bd-glyph { border-radius: 99px; background: var(--signal); }
+.is-running .bd-glyph { border-radius: 99px; background: var(--live); animation: bd-halo 2.4s var(--ease) infinite; }
+.is-next .bd-glyph { border-radius: 99px; box-shadow: inset 0 0 0 1.6px var(--t-3); }
+.is-settled .bd-glyph {
+  width: 9px; height: 5px; margin-top: -3px;
+  border-left: 1.7px solid var(--t-3); border-bottom: 1.7px solid var(--t-3);
+  transform: rotate(-45deg);
+}
+@keyframes bd-halo {
+  0% { box-shadow: 0 0 0 0 rgba(43, 59, 255, 0.34); }
+  70%, 100% { box-shadow: 0 0 0 6px rgba(43, 59, 255, 0); }
+}
+
+.bd-col-body {
+  flex: 1; min-height: 0; overflow-y: auto;
+  padding: 14px 16px 28px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.bd-empty {
+  padding: 22px 12px; text-align: center;
+  border: 1.5px dashed var(--line-2); border-radius: 12px;
+  font-size: 12px; color: var(--t-3);
+}
+
+/* ---- Cards ---------------------------------------------------------------*/
+.bd-card {
+  display: flex; flex-direction: column; gap: 6px;
+  width: 100%; padding: 13px 14px 12px;
+  background: var(--n-1);
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  box-shadow: var(--lift);
+  transition: transform var(--fast) var(--ease), box-shadow var(--base) var(--ease),
+              border-color var(--fast) var(--ease), background var(--fast) var(--ease);
+  animation: rm-in var(--base) var(--ease);
+}
+.bd-card:hover { background: #fff; border-color: var(--line-3); box-shadow: var(--lift-2); }
+.bd-card.is-on { background: #fff; box-shadow: 0 0 0 1.5px var(--t-1), var(--lift); border-color: transparent; }
+
+.bd-top { display: flex; align-items: center; gap: 8px; min-height: 20px; }
+.bd-ref { font: 500 11px/1 var(--mono); color: var(--t-3); letter-spacing: -0.02em; }
+.bd-kind { font-size: 11px; color: var(--t-3); }
+.bd-at {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--t-4); white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.bd-at.is-live { color: var(--live); font-weight: 500; }
+.bd-live { width: 6px; height: 6px; border-radius: 99px; background: var(--live); animation: bd-halo 2.4s var(--ease) infinite; }
+.bd-title {
+  font-size: 13.5px; line-height: 1.36; font-weight: 550;
+  color: var(--t-1); letter-spacing: -0.012em; text-wrap: pretty;
+}
+.bd-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 3px; min-height: 22px; }
+
+/* ---- Needs you: a question, with its answers -----------------------------*/
+.bd-ask {
+  background: #fff;
+  padding: 14px 14px 12px;
+}
+/* the same paper as every other card: the stamp and the answers carry the violet */
+.bd-ask.is-on { box-shadow: 0 0 0 1.5px var(--signal), var(--lift); }
+/* what kind of call it is, said plainly: a word, not a badge */
+.bd-stamp { font-size: 11.5px; font-weight: 600; color: var(--signal-bright); }
+.bd-ask .bd-title { font-size: 14px; margin-top: 2px; }
+.bd-why { font-size: 12px; line-height: 1.5; color: var(--t-2); text-wrap: pretty; }
+.bd-opts { display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
+.bd-opt {
+  display: flex; align-items: center; gap: 9px;
+  padding: 6px 9px 6px 7px; border-radius: 8px;
+  background: var(--signal-paper);
+  font-size: 12px; line-height: 1.3; color: var(--t-1);
+  transition: background var(--fast) var(--ease);
+}
+.bd-ask:hover .bd-opt { background: #f1eaff; }
+.bd-opt-k {
+  flex: none; width: 17px; height: 17px;
+  display: grid; place-items: center;
+  border-radius: 5px; background: #fff;
+  box-shadow: inset 0 0 0 1px var(--signal-line);
+  font: 600 10px/1 var(--mono); color: var(--signal-bright);
+}
+.bd-holds { font-size: 11px; color: var(--t-3); }
+.bd-go {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11.5px; font-weight: 600; color: var(--signal-bright);
+}
+.bd-go svg { transition: transform var(--fast) var(--ease); }
+.bd-ask:hover .bd-go svg { transform: translateX(2px); }
+
+/* ---- Review: finished, waiting to be accepted -------------------------------*/
+.bd-pr {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 7px; margin-top: 4px; padding: 8px 10px;
+  border-radius: 8px; background: var(--n-2); box-shadow: inset 0 0 0 1px var(--line);
+  font-size: 12px; color: var(--t-1);
+}
+.bd-pr-repo { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 550; }
+.bd-pr-n { font: 500 11.5px/1 var(--mono); color: var(--t-3); }
+.bd-pr-stat { margin-left: auto; display: inline-flex; gap: 6px; font: 600 11px/1 var(--mono); }
+.bd-pr-stat .is-add { color: var(--ok); }
+.bd-pr-stat .is-del { color: var(--danger); }
+.bd-review .bd-holds svg { margin-right: 4px; }
+
+/* ---- Running: the step track -----------------------------------------------*/
+.bd-track { display: flex; align-items: center; height: 14px; margin: 7px 0 0; }
+.bd-track i { flex: 1; display: flex; align-items: center; height: 14px; }
+.bd-track i:first-child { flex: none; }
+.bd-track i::before { content: ''; flex: 1; height: 1.5px; background: var(--track); }
+.bd-track i:first-child::before { display: none; }
+.bd-track i::after {
+  content: ''; flex: none; box-sizing: border-box;
+  width: 8px; height: 8px; border-radius: 99px;
+  border: 1.5px solid var(--n-5); background: var(--n-1);
+}
+.bd-track i.is-done::after { background: var(--t-2); border-color: var(--t-2); }
+.bd-track i:is(.is-done, .is-running)::before { background: var(--t-2); }
+.bd-track i.is-running::after {
+  width: 10px; height: 10px; border-color: var(--live); background: var(--live);
+  animation: bd-halo 2.4s var(--ease) infinite;
+}
+.bd-track i.is-blocked::after { border-color: var(--signal); background: var(--signal-paper); }
+/* a step a rule inserted is a diamond, so the graph's own shape shows on the card */
+.bd-track i.is-added::after { border-radius: 2px; transform: rotate(45deg) scale(0.92); }
+.bd-step { display: flex; align-items: baseline; gap: 8px; font-size: 11.5px; }
+.bd-step b { font-weight: 550; color: var(--live); }
+.bd-step span { margin-left: auto; color: var(--t-3); font-variant-numeric: tabular-nums; }
+.bd-foot .model {
+  height: 22px; padding: 0 8px 0 6px; border-radius: 99px;
+  background: var(--n-2); box-shadow: inset 0 0 0 1px var(--line);
+}
+.bd-added {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 3px;
+  font-size: 11px; color: var(--t-3); white-space: nowrap;
+}
+
+/* ---- Up next: a queue, in the order it will start ------------------------*/
+.bd-queue { margin-top: -4px; }
+.bd-next .bd-title { color: var(--t-2); font-weight: 500; }
+.bd-next:hover .bd-title { color: var(--t-1); }
+.bd-n {
+  display: inline-grid; place-items: center; width: 16px; height: 16px; margin-right: 2px;
+  border-radius: 99px; box-shadow: inset 0 0 0 1px var(--line-3);
+  font: 500 10px/1 var(--mono); color: var(--t-3);
+}
+.bd-why-not {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11.5px; color: var(--t-3);
+}
+.bd-why-not.is-held { color: var(--signal-bright); }
+
+/* the tasks a question holds, by number */
+.bd-holds { display: inline-flex; align-items: center; gap: 4px; }
+.bd-chip {
+  display: inline-grid; place-items: center; height: 18px; padding: 0 6px;
+  border-radius: 5px; background: var(--n-2); box-shadow: inset 0 0 0 1px var(--line-2);
+  font: 500 10.5px/1 var(--mono); color: var(--t-2);
+}
+
+/* ---- Settled: a ledger -------------------------------------------------------*/
+.bd-ledger { list-style: none; margin: 0; padding: 0; }
+.bd-ledger li + li { border-top: 1px solid var(--line-2); }
+.bd-row {
+  display: flex; flex-direction: column; gap: 5px;
+  width: 100%; padding: 12px 10px;
+  border-radius: 10px;
+  transition: background var(--fast) var(--ease);
+}
+.bd-row:hover { background: var(--n-1); }
+.bd-row.is-on { background: #fff; box-shadow: 0 0 0 1.5px var(--t-1); }
+.bd-outcome { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; color: var(--t-1); }
+.bd-row .bd-ref { margin-left: 2px; }
+.bd-row .bd-title { font-size: 13px; font-weight: 500; }
+.bd-meta { font-size: 11.5px; line-height: 1.45; color: var(--t-3); }
+.bd-meta .bd-kind { color: var(--t-2); padding-right: 7px; margin-right: 7px; border-right: 1px solid var(--line-2); }
+.is-merged .bd-outcome { color: var(--ok); }
+.is-knowledge .bd-outcome { color: var(--live); }
+.is-abandoned .bd-outcome { color: var(--t-3); }
+.is-abandoned .bd-title { color: var(--t-2); }
+

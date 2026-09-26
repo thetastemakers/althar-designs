@@ -1,0 +1,119 @@
+@import './tokens.css';
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--n-0);
+  color: var(--t-1);
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 1.45;
+  letter-spacing: -0.005em;
+  font-feature-settings: 'cv05' 1, 'cv11' 1, 'ss03' 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+}
+
+button, input, textarea, select {
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+button { cursor: pointer; text-align: left; }
+button:disabled { cursor: default; }
+
+::selection { background: var(--signal-dim); color: var(--t-1); }
+
+:focus { outline: none; }
+:focus-visible {
+  outline: 1.5px solid var(--signal);
+  outline-offset: 1px;
+  border-radius: var(--r-sm);
+}
+
+/* Scrollbars — present, but not furniture. */
+* { scrollbar-width: thin; scrollbar-color: var(--n-5) transparent; }
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--n-5);
+  border-radius: 99px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--n-5-hover); background-clip: content-box; }
+
+/* ---- Shared primitives ---------------------------------------------------*/
+
+.mono {
+  font-family: var(--mono);
+  font-size: 0.92em;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Section eyebrow: the only "label" style in the product. */
+.eyebrow {
+  font-size: 10.5px;
+  font-weight: 550;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--t-4);
+}
+
+/* The running indicator. Deliberately colourless — the machine working is
+   not an event that deserves colour. */
+.pulse {
+  width: 5px; height: 5px;
+  border-radius: 99px;
+  background: var(--live);
+  flex: none;
+  animation: pulse 2s var(--ease) infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.82); }
+  50%      { opacity: 1;    transform: scale(1); }
+}
+
+.dot-done  { width: 5px; height: 5px; border-radius: 99px; background: var(--t-4); flex: none; }
+.dot-queue { width: 5px; height: 5px; border-radius: 99px; border: 1px solid var(--n-5); flex: none; }
+.dot-signal{ width: 5px; height: 5px; border-radius: 99px; background: var(--signal); flex: none; }
+
+/* Keycap */
+kbd, .kbd {
+  font-family: var(--font);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 15px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-sm);
+  background: var(--n-4);
+  color: var(--t-3);
+  border: 1px solid var(--line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .pulse { opacity: 0.85; }
+}
+
+/* Where a container already renders the focus state, the ring is noise. */
+.rm-composer input:focus-visible { outline: none; }
