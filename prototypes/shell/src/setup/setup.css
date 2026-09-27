@@ -1,0 +1,5 @@
+.su { display: grid; grid-template-rows: 46px minmax(0, 1fr); height: 100%; background: var(--n-2); }
+.su-chrome { background: var(--chrome); }
+.su-page { overflow: auto; padding: 56px 24px 80px; }
+.su-form { max-width: 860px; margin: 0 auto; }
+.su-welcome { height: 100%; }

@@ -17,15 +17,6 @@ export const Dot = ({ s }) =>
   : s === 'done' ? <span className="dot-done" />
   : <span className="dot-queue" />
 
-export function Bar({ task, st }) {
-  if (!task.graph) return null
-  return (
-    <div className="tv-bar">
-      {task.graph.map((n) => <i key={n.id} className={'is-' + stepState(st, n)} title={n.label} />)}
-    </div>
-  )
-}
-
 export function Findings({ open = false }) {
   return <div className="tv-findings">{findings.map((f) => <Finding key={f.id} f={f} open={open} />)}</div>
 }

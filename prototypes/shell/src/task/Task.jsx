@@ -1,14 +1,23 @@
 import { useState } from 'react'
-import Icon from '../lib/Icon.jsx'
-import Model from '../lib/Model.jsx'
+import * as ui from '@charrette/ui'
+import { TaskStatus, TrackStep } from '@charrette/ui'
+import { MODELS } from '../lib/Model.jsx'
+import { model } from '../lib/models.js'
 import { useKey } from '../lib/hooks.js'
 import { taskFor } from './data.js'
-import { Bar } from './parts.jsx'
+import { stepState } from './parts.jsx'
 import Talk from './Talk.jsx'
 import Outputs from './Outputs.jsx'
 import Graph from './Graph.jsx'
 import Diff from './Diff.jsx'
+import Face from '../chat/Face.jsx'
+import { LISTEN } from '../chat/listen.js'
+import Flow from '../chat/Flow.jsx'
+import Flow418 from '../chat/Flow418.jsx'
 import './task.css'
+
+/* Tasks whose conversation is built from the chat primitives. */
+const CHATS = { refunds: Flow, token: Flow418 }
 
 /* One task, two faces.
 
@@ -27,13 +36,25 @@ import './task.css'
 /* Each face has its own key, so the way back is as obvious as the way in. */
 const FACES = { talk: ['Conversation', 'c'], out: ['Outputs', 'o'] }
 
-export default function Task({ taskRef, state, onClose }) {
+const STEP = { done: TrackStep.Done, running: TrackStep.Now, held: TrackStep.Now, queued: TrackStep.Next }
+
+/* Violet only while a step is actually held, or a verified change waits on
+   you: an offer, or an answered question, is not a stoppage. */
+const statusOf = (st) =>
+  st.held || st.id === 'ready' ? TaskStatus.Yours
+  : st.id === 'settled' ? TaskStatus.Done
+  : st.active || st.id === 'running' ? TaskStatus.Running
+  : TaskStatus.Done
+
+export default function Task({ taskRef, state, onClose, running = 0, yours = 0, onYours }) {
   const task = taskFor(taskRef)
   const raw = task?.states[state] || task?.states.running
 
   const [face, setFace] = useState(null)
   const [overlay, setOverlay] = useState(null)
   const [recorded, setRecorded] = useState(null)
+  /* stopped from the task menu, until resumed; abandoned settles it */
+  const [ended, setEnded] = useState(null)
 
   const shown = face || raw?.face
   /* Choosing a face puts the expansion away: the graph and the diff belong to
@@ -61,82 +82,71 @@ export default function Task({ taskRef, state, onClose }) {
     : raw
 
   const wide = shown === 'out' || overlay === 'graph'
+  const status = ended === 'stopped' ? TaskStatus.Stopped : ended === 'abandoned' ? TaskStatus.Done : statusOf(st)
 
   return (
     <div className="tv-win">
-      <div className="tv-bar-top">
-        <div className="traffic"><i /><i /><i /></div>
-        {/* the way out sits where the eye starts, like a breadcrumb */}
-        <button className="tv-bar-out" onClick={onClose}>
-          <Icon name="arrow" size={12} className="tv-bar-back" />Meridian<span className="kbd">esc</span>
-        </button>
-        <span className="tv-bar-sep">/</span>
-        <span className="mono tv-bar-ref">{task.ref}</span>
-        <span className="tv-bar-t">{task.title}</span>
-      </div>
+      {/* the way out sits where the eye starts, like a breadcrumb */}
+      {/* what else needs you stays in sight while a task has the window */}
+      <ui.TitleBar lights="drawn" className="tv-chrome" end={<ui.WorkStatus running={running} yours={yours} onYours={onYours} />}>
+        <ui.BackCrumb to="Meridian" kbd="esc" onBack={onClose} task={task.ref} title={task.title} />
+      </ui.TitleBar>
 
       {overlay === 'diff' ? (
         <div className="tv"><Diff mode="full" branch={task.branch} onClose={() => setOverlay(null)} /></div>
       ) : (
         <div className="tv">
-          <header className="tv-head">
+          <div className="tv-head">
             <div className={'tv-measure' + (wide ? ' is-wide' : '')}>
-              <div className="tv-title-line">
-                <span className="mono tv-ref">{task.ref}</span>
-                <h1>{task.title}</h1>
-                {/* brass only while a step is actually held: an offer, or an
-                    answered question, is not a stoppage */}
-                <span className={'tv-state' + (st.held ? ' is-held' : '')}>{st.chrome}</span>
-              </div>
-              <p className="tv-meta">
-                {task.label}
-                <i /><Model id={task.worker} short />
-                <i />{task.branch || 'no branch'}
-                <i />{st.since}
-                <i />{st.elapsed}
-                {/* what it cost, at API prices, even on a subscription — there
-                    if you look, never a meter */}
-                {st.cost && <><i /><span className="tv-cost" title="Estimated at API prices">{st.cost}</span></>}
-              </p>
-              <Bar task={task} st={st} />
-
-              <div className="tv-faces">
-                {task.faces.length > 1 ? (
-                  <div className="tv-seg">
-                    {task.faces.map((f) => (
-                      <button key={f} className={'tv-seg-b' + (shown === f ? ' is-on' : '')}
-                        onClick={() => goFace(f)}>
-                        {FACES[f][0]}<span className="kbd">{FACES[f][1]}</span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="tv-faces-none">Nothing was built, so there is nothing else to look at.</p>
-                )}
-
-                <div className="tv-expands">
-                  {task.graph && (
-                    <button className={'tv-expand' + (overlay === 'graph' ? ' is-on' : '')}
-                      onClick={() => setOverlay(overlay === 'graph' ? null : 'graph')}>
-                      <Icon name="branch" size={12} />Graph<span className="kbd">g</span>
-                    </button>
-                  )}
-                  {task.branch && (
-                    <button className="tv-expand" onClick={() => setOverlay('diff')}>
-                      <Icon name="work" size={12} />Code<span className="kbd">d</span>
-                    </button>
-                  )}
-                </div>
-              </div>
+              <ui.TaskHeader
+                task={task.ref}
+                title={task.title}
+                status={status}
+                state={ended === 'stopped' ? 'Stopped by you' : ended === 'abandoned' ? 'Abandoned' : st.chrome}
+                kind={task.label}
+                lead={model(task.worker)}
+                branch={task.branch || undefined}
+                since={st.since}
+                elapsed={st.elapsed}
+                cost={st.cost}
+                steps={task.graph?.map((n) => ({ label: n.label, state: STEP[stepState(st, n)] }))}
+                faces={task.faces.map((f) => ({ value: f, label: FACES[f][0], kbd: FACES[f][1] }))}
+                face={shown}
+                onFace={goFace}
+                facesNote={task.faces.length > 1 || task.branch ? undefined : 'Nothing was built, so there is nothing else to look at.'}
+                actions={
+                  <>
+                    {task.graph && (
+                      <ui.ChromeButton icon="branch" label="Graph" kbd="g" pressed={overlay === 'graph'} onClick={() => setOverlay(overlay === 'graph' ? null : 'graph')} />
+                    )}
+                    {task.branch && <ui.ChromeButton icon="work" label="Code" kbd="d" onClick={() => setOverlay('diff')} />}
+                    <ui.TaskMenu
+                      status={status}
+                      onStop={() => setEnded('stopped')}
+                      onResume={() => setEnded(null)}
+                      onAbandon={() => setEnded('abandoned')}
+                      onReopen={() => setEnded(null)}
+                    />
+                  </>
+                }
+              />
             </div>
-          </header>
+          </div>
 
           {overlay === 'graph'
             ? <Graph task={task} st={st} onClose={() => setOverlay(null)} />
             : shown === 'out'
               ? <Outputs task={task} st={st} onFull={() => setOverlay('diff')} />
-              : <Talk task={task} st={st} recorded={recorded} onRecord={setRecorded}
-                  onFull={() => setOverlay('diff')} />}
+              : CHATS[task.chat]
+                ? (() => { const Thread = CHATS[task.chat]; return (
+                    <Face key={task.ref + st.id} busy={st.id === 'running'} listen={LISTEN[`${task.ref}:${st.id}`]} composer={{
+                      model: task.worker, role: `Lead agent · task ${task.ref}`,
+                      placeholder: st.id === 'running' ? 'Add to the queue, or interrupt the lead' : `Tell ${MODELS[task.worker]?.short} something about ${task.ref}`,
+                      context: { used: 188, note: 'Each step starts from the task record, so a full context never loses the task.' },
+                    }}><Thread state={st.id} /></Face>
+                  ) })()
+                : <Talk task={task} st={st} recorded={recorded} onRecord={setRecorded}
+                    onFull={() => setOverlay('diff')} />}
         </div>
       )}
     </div>

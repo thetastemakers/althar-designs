@@ -183,6 +183,26 @@ export const execution = [
     ],
   },
   {
+    id: 't431',
+    ref: '431',
+    kind: 'Delivery',
+    title: 'Refunds rate-limit like charges',
+    state: 'running',
+    stateLabel: 'Draft PR',
+    worker: 'gpt-5.2-codex',
+    elapsed: '8m',
+    branch: 'ch/431-refund-limits',
+    note: 'Lead moved to Codex when Claude Code hit its usage limit.',
+    graph: [
+      { id: 'r1', label: 'Triage',             state: 'done',    meta: 'one question, answered' },
+      { id: 'r2', label: 'Implement',          state: 'done',    meta: '3 files · claude-opus-5' },
+      { id: 'r3', label: 'Review',             state: 'done',    meta: '2 fixed, 1 set aside' },
+      { id: 'r4', label: 'Security review',    state: 'done',    meta: 'no findings', added: true },
+      { id: 'r5', label: 'Verify on fixtures', state: 'done',    meta: '1,200 of 1,200 match' },
+      { id: 'r6', label: 'Draft PR',           state: 'running', meta: 'running the full suite' },
+    ],
+  },
+  {
     id: 't418b',
     ref: '422',
     kind: 'Delivery',
@@ -317,34 +337,81 @@ export const repo = {
 }
 
 /* ---- The continuous conversation with the coordinator --------------------
-   Oldest first — this is a thread you have been in for days, not a session
+   Oldest first: this is a thread you have been in for days, not a session
    that starts when the app opens.
-   `thread` entries are work the coordinator opened out of something you said. */
+
+   Each task has one live card, posted where its status last changed. Every
+   earlier card for it has folded into a `mark`, one quiet line where it
+   was. `launch` is a plan the coordinator shows once before a task starts. */
+const S414 = ['Implement', 'Review', 'Repair', 'Draft PR']
+const S418 = ['Requirements', 'Implement', 'Review', 'Repair', 'Security review', 'Verify', 'Evidence']
+const S431 = ['Triage', 'Implement', 'Review', 'Security review', 'Verify on fixtures', 'Draft PR']
+
 export const conversation = [
   { id: 'c1', who: 'you', at: '3 days ago',
     body: 'Target 2.14 for release. Token rotation, webhook v2 and refund idempotency have to land. Checkout latency can slip.' },
   { id: 'c2', who: 'coordinator', at: '3 days ago',
-    body: 'Recorded as the project intent — every worker gets it as context from now on. I opened three threads and I will hold anything that is not in scope rather than starting it.' },
+    body: 'Recorded as the project intent; every agent gets it as context from now on. I planned three tasks and will hold anything outside it rather than start it.' },
+  { id: 'm414a', who: 'mark', task: '414', at: '3 days ago', verb: 'started', detail: 'Codex leads', steps: S414, step: 0 },
+  { id: 'm418a', who: 'mark', task: '418', at: '2 days ago', verb: 'started', detail: 'Opus 5 leads', steps: S418, step: 0 },
   { id: 'c4', who: 'coordinator', at: '3h ago',
     body: 'Refund idempotency is merged after two review cycles. Evidence is kept on the task.' },
-  { id: 'c3', who: 'thread', ref: '414', link: 's1',
-    title: 'Add idempotency keys to the refund endpoint',
-    state: 'Merged', at: '3h ago', meta: 'PR 1184 · 2 review cycles · 1 repair' },
+  { id: 'k414', who: 'card', task: '414', link: 's1', fallback: 'settled', at: '3h ago', status: 'done',
+    title: 'Add idempotency keys to the refund endpoint', lead: 'gpt-5.2-codex', branch: 'ch/414-refund-idem',
+    steps: S414, step: 4, now: 'Merged after two review cycles', started: 'took 2d 4h', pr: 'PR 1184' },
 
-  /* Everything below arrived while the window was closed. */
+  /* Everything below arrived while the window was closed, or since. */
   { id: 'c5', who: 'brief', at: '07:41' },
 
-  { id: 'c6', who: 'thread', ref: '418', link: 't418',
-    title: 'Repair token refresh on privilege change',
-    state: 'Security review', at: '6m ago', meta: 'claude-opus-5 · 5 of 7 steps' },
+  { id: 'y431', who: 'you', at: '2h 40m ago',
+    body: 'Refunds should rate-limit like charges do. Match the headers exactly.' },
+  { id: 'c431', who: 'coordinator', at: '2h 40m ago',
+    body: 'Task 431. Opus 5 leads: it’s the money path, across three files. Review runs on two labs and security review is required by your rule for money handling.' },
+  { id: 'm431a', who: 'mark', task: '431', at: '2h 40m ago', verb: 'started', detail: 'Opus 5 leads', steps: S431, step: 0 },
+  { id: 'm431b', who: 'mark', task: '431', at: '2h 38m ago', verb: 'waited on you', detail: 'queue or refuse over the limit', steps: S431, step: 0 },
+  { id: 'm431c', who: 'mark', task: '431', at: '1h 55m ago', verb: 'moved to Review', detail: 'Sonnet 5 and Gemini 3 Pro', steps: S431, step: 2 },
+  { id: 'l431', who: 'moved', at: '1h 20m ago', what: 'Task 431’s lead', to: 'gpt-5.2-codex', runtime: 'Claude Code', resets: '14:00' },
+  { id: 'm431d', who: 'mark', task: '431', at: '1h 12m ago', verb: 'moved to Verify on fixtures', detail: 'staging was frozen', steps: S431, step: 4 },
+  { id: 'm418b', who: 'mark', task: '418', at: '18m ago', verb: 'moved to Repair', detail: '3 findings from review', steps: S418, step: 3 },
 
   { id: 'c7', who: 'you', at: '14m ago',
     body: 'Why do refunds fail fast when webhooks retry?' },
   { id: 'c7b', who: 'coordinator', at: '11m ago',
     body: 'Because a queued refund can pay out twice if the webhook retries while it waits. That was decided in February, on task 402. The full answer and its sources are on 425, and it proposes one knowledge entry for you to accept.' },
-  { id: 'c8', who: 'thread', ref: '425', link: 't425', bare: true, view: 'needs',
-    title: 'Why do refunds fail fast when webhooks retry?',
-    state: 'Answered', at: '11m ago', meta: 'nothing built · 1 entry proposed' },
+  { id: 'k425', who: 'card', task: '425', view: 'needs', at: '11m ago', status: 'done', kind: 'Question',
+    title: 'Why do refunds fail fast when webhooks retry?', lead: 'claude-sonnet-5',
+    now: 'Answered · proposes one knowledge entry', started: 'took 40s', meta: 'nothing built' },
+
+  { id: 'k431', who: 'card', task: '431', at: '8m ago', status: 'running',
+    title: 'Refunds rate-limit like charges', lead: 'gpt-5.2-codex', branch: 'ch/431-refund-limits',
+    steps: S431, step: 5, seen: 5, now: 'Draft PR · running the full suite first', started: 'started 2h 40m ago' },
+  { id: 'k418', who: 'card', task: '418', link: 't418', at: '6m ago', status: 'running',
+    title: 'Repair token refresh on privilege change', lead: 'claude-opus-5', branch: 'ch/418-token-refresh',
+    steps: S418, step: 4, now: 'Security review · added by your rule', started: 'started 2 days ago' },
+
+  { id: 'y427', who: 'you', at: 'just now', issue: 'MER-231',
+    body: 'linear.app/meridian/issue/MER-231 Take this end to end. It’s a one-off script, but it writes to refunds.' },
+  { id: 'c427', who: 'coordinator', at: 'just now',
+    body: 'Task 427, from MER-231. This is the plan; change anything before it starts.' },
+  { id: 'p427', who: 'launch', task: '427', from: 'MER-231', branch: 'ch/427-backfill-idempotency',
+    title: 'Backfill idempotency keys on refunds created before PR 1184',
+    estimate: 'About 40 min · about $2 on your subscriptions', now: 'Reading the refunds schema',
+    steps: [
+      { id: 'impl', label: 'Implement', model: 'claude-opus-5', why: 'recommended · writes to money records', fixed: 'the lead' },
+      { id: 'dry', label: 'Dry run on a copy', model: 'gpt-5.2-codex', why: 'replays against last night’s snapshot', optional: true },
+      { id: 'review', label: 'Review', models: ['claude-sonnet-5', 'gemini-3-pro'], why: 'two labs, combined', optional: true },
+      { id: 'sec', label: 'Security review', model: 'claude-sonnet-5', why: 'required by your rule for money handling', fixed: 'Meridian’s rule' },
+    ] },
+]
+
+export const issues = {
+  'MER-231': { id: 'MER-231', title: 'Backfill idempotency keys on refunds created before PR 1184', state: 'Todo', priority: 'High', meta: 'Due 2.20 · Partner success' },
+}
+
+/* A new task from something you type: the coordinator's default plan. */
+export const defaultPlan = [
+  { id: 'impl', label: 'Implement', model: 'claude-opus-5', why: 'recommended for this project', fixed: 'the lead' },
+  { id: 'review', label: 'Review', model: 'gpt-5.2-codex', why: 'a different lab from the lead', optional: true },
 ]
 
 /* The overnight brief. Written as the coordinator reporting to you, not as

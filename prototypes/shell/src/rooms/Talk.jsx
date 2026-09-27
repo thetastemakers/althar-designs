@@ -1,23 +1,44 @@
 import { useEffect, useRef, useState } from 'react'
 import Icon from '../lib/Icon.jsx'
 import { useDismiss } from '../lib/hooks.js'
-import { brief, conversation, execution, intent } from '../data/project.js'
-import Model, { MODELS, WithModels } from '../lib/Model.jsx'
+import { brief, conversation, intent, issues } from '../data/project.js'
+import Model, { MODELS } from '../lib/Model.jsx'
 import Composer from '../lib/Composer.jsx'
+import { Streamed } from '../lib/Stream.jsx'
+import Listening from '../lib/Listening.jsx'
+import { COORDINATOR_LISTENS } from '../chat/listen.js'
+import { Issue, TaskCard, TaskLaunch, TaskMark } from '../chat/coordinator.jsx'
+import { LimitMoved } from '../chat/parts.jsx'
+import '../task/task.css'
+import '../chat/chat.css'
 
 /* The conversation room. One continuous thread with the coordinator: what
    you asked for, what it did about it, and the work it opened. */
-export default function Talk({ said, answered, onOpen, onSay, composerRef, dock, draft, setDraft, side, project, onRename }) {
+export default function Talk({ said, answered, onOpen, onSay, onStart, onStreamed, composerRef, dock, draft, setDraft, side, project, onRename }) {
   const scroll = useRef(null)
   /* The coordinator is a model too, and you choose it. Swapping keeps the
      whole conversation: it is the project's, compacted, not the model's. */
   const [coord, setCoord] = useState('claude-opus-5')
   const [swaps, setSwaps] = useState([])
+  const [listens, setListens] = useState(COORDINATOR_LISTENS)
 
   useEffect(() => {
     const el = scroll.current
     if (el) el.scrollTop = el.scrollHeight
   }, [said.length, swaps.length])
+
+  /* while a reply streams in, the thread follows it, unless you have
+     scrolled up to read something else */
+  const pinned = useRef(true)
+  useEffect(() => {
+    const el = scroll.current
+    if (!el) return
+    const onScroll = () => { pinned.current = el.scrollHeight - el.scrollTop - el.clientHeight < 90 }
+    const ro = new ResizeObserver(() => { if (pinned.current) el.scrollTop = el.scrollHeight })
+    el.addEventListener('scroll', onScroll, { passive: true })
+    ro.observe(el.firstElementChild)
+    return () => { el.removeEventListener('scroll', onScroll); ro.disconnect() }
+  }, [])
 
 
   return (
@@ -37,9 +58,26 @@ export default function Talk({ said, answered, onOpen, onSay, composerRef, dock,
           {/* a turn is everything one side says before the other answers:
               the coordinator's messages and the work it opened sit under one
               name, and yours sit on the right */}
-          {[...conversation, ...said].map((m, i, all) => (
-            <Entry key={m.id} m={m} first={turnStarts(all, i)} answered={answered} onOpen={onOpen} dock={dock} />
-          ))}
+          {(() => {
+            const all = [...conversation, ...said]
+            /* where each task is now, from its live card; and which of its
+               folded lines is the most recent, the one that says so */
+            const now = {}, lastMark = {}
+            all.forEach((m) => {
+              if (m.who === 'card') now[m.task] = m.status === 'you' ? 'Waiting on you' : m.status === 'done' ? (m.kind === 'Question' ? 'Answered' : 'Done') : m.steps?.[m.step]
+              if (m.who === 'mark') lastMark[m.task] = m.id
+            })
+            const jump = (ref) => {
+              const el = scroll.current?.querySelector(`.cs-tc[data-task="${ref}"]`)
+              if (!el) return
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              el.classList.remove('is-found'); void el.offsetWidth; el.classList.add('is-found')
+            }
+            return all.map((m, i) => (
+              <Entry key={m.id} m={m} first={turnStarts(all, i)} answered={answered} onOpen={onOpen} onStart={onStart} onStreamed={onStreamed}
+                now={now[m.task]} last={lastMark[m.task] === m.id} onJump={() => jump(m.task)} />
+            ))
+          })()}
           {swaps.map((w, i) => (
             <div className="tv-swap" key={i}>
               <span>Coordinator changed to</span><Model id={w.to} />
@@ -58,25 +96,47 @@ export default function Talk({ said, answered, onOpen, onSay, composerRef, dock,
           model={coord} role="Coordinator · Meridian"
           onModel={(to) => { setSwaps((w) => [...w, { from: coord, to }]); setCoord(to) }}
           context={{ used: 412, note: 'Compacted as it fills. The whole conversation stays in the project; older turns reach the model as a summary.' }}
+          above={listens.length > 0 && (
+            <Listening sources={listens} onStop={(id) => setListens((v) => v.filter((x) => x.id !== id))}
+              note="What arrives comes into this conversation. Tasks listen to their own pull requests." />
+          )}
         />
       </div>
     </section>
   )
 }
 
-const side = (m) => (m.who === 'you' ? 'you' : 'them')
-const turnStarts = (all, i) => i === 0 || side(all[i - 1]) !== side(all[i]) || all[i].who === 'brief'
+/* A turn is everything one side says before the other answers. The quiet
+   lines (a task that moved on, a limit handled) belong to neither side, so
+   whatever the coordinator says after one starts a turn of its own. */
+const side = (m) => (m.who === 'you' ? 'you' : m.who === 'mark' || m.who === 'moved' ? 'line' : 'them')
+const turnStarts = (all, i) => i === 0 || side(all[i - 1]) !== side(all[i]) || all[i].who === 'brief' || all[i - 1].who === 'brief'
 
-function Entry({ m, first, answered, onOpen, dock }) {
+function Entry({ m, first, answered, onOpen, onStart, onStreamed, now, last, onJump }) {
   if (m.who === 'brief') return <Brief answered={answered} onOpen={onOpen} />
   if (m.who === 'you') {
     return (
       <div className={'rm-you' + (first ? ' is-first' : '')}>
         <p className="rm-you-body">{m.body}</p>
+        {m.issue && <div className="cs-unfurl rm-unfurl"><Issue {...issues[m.issue]} /></div>}
         <span className="rm-you-at">{m.at}</span>
       </div>
     )
   }
+  if (m.who === 'mark') {
+    return (
+      <div className={'rm-line' + (first ? ' is-first' : '')}>
+        <TaskMark task={m.task} verb={m.verb} detail={m.detail} at={m.at} steps={m.steps} step={m.step} seen={m.seen}
+          now={now} last={last} onJump={onJump} />
+      </div>
+    )
+  }
+  if (m.who === 'moved') {
+    return <div className={'rm-line' + (first ? ' is-first' : '')}><LimitMoved what={m.what} to={m.to} runtime={m.runtime} resets={m.resets} /></div>
+  }
+  const openTask = () => onOpen(m.who === 'launch'
+    ? { kind: 'new', id: 'n' + m.task }
+    : { kind: 'thread', ref: m.task, view: m.view, id: m.link, fallback: m.fallback || 'work' })
   return (
     <div className={'rm-turn' + (first ? ' is-first' : '')}>
       {first && (
@@ -85,8 +145,15 @@ function Entry({ m, first, answered, onOpen, dock }) {
           <span className="rm-msg-at">{m.at}</span>
         </div>
       )}
-      {m.who === 'thread'
-        ? <ThreadCard m={m} onOpen={onOpen} dock={dock} />
+      {m.who === 'card'
+        ? <TaskCard task={m.task} status={m.status} kind={m.kind} title={m.title} lead={m.lead} branch={m.branch} from={m.from}
+            steps={m.steps} at={m.step} seen={m.seen} now={m.now} started={m.started} pr={m.pr} meta={m.meta}
+            fresh={m.fresh} onOpen={openTask} />
+        : m.who === 'launch'
+        ? <TaskLaunch task={m.task} title={m.title} from={m.from} branch={m.branch} steps={m.steps} estimate={m.estimate} now={m.now}
+            onStart={(t) => onStart?.({ ...t, id: m.id, ref: m.task })} onOpen={openTask} />
+        : m.stream
+        ? <Streamed text={m.body} id={m.id} className="rm-msg-body" onDone={() => onStreamed?.(m)} />
         : <p className="rm-msg-body">{m.body}</p>}
     </div>
   )
@@ -118,34 +185,6 @@ function ProjectMenu({ project, onRename }) {
         </div>
       )}
     </span>
-  )
-}
-
-function ThreadCard({ m, onOpen, dock }) {
-  const t = execution.find((x) => x.id === m.link)
-  const done = t ? t.graph.filter((n) => n.state === 'done').length : 0
-  const total = t ? t.graph.length : 4
-  const on = dock?.id === m.link
-  return (
-    <button className={'rm-thread' + (on ? ' is-on' : '')}
-      onClick={() => onOpen({ kind: 'thread', ref: m.ref, view: m.view, id: m.link, fallback: t ? 'work' : 'new' })}>
-      <span className="rm-thread-top">
-        <span className="mono rm-thread-ref">{m.ref}</span>
-        <span className="rm-thread-state">{m.state}</span>
-        <span className="rm-thread-at">{m.at}</span>
-      </span>
-      <span className="rm-thread-title">{m.title}</span>
-      {/* A question has no steps to run down, and settled work has none
-          left, so neither gets a bar to lie with. */}
-      {!m.bare && !m.link?.startsWith('s') && (
-        <span className="rm-bar">
-          {Array.from({ length: total }, (_, i) => (
-            <i key={i} className={i < done ? 'is-done' : i === done ? 'is-run' : ''} />
-          ))}
-        </span>
-      )}
-      <span className="rm-thread-meta"><WithModels>{m.meta}</WithModels></span>
-    </button>
   )
 }
 

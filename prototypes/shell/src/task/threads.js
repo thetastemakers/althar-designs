@@ -109,7 +109,7 @@ const q = {
   ],
   settled: [
     { who: 'lead', at: '10m ago',
-      body: 'Kept. It is canonical now, with this task as its provenance, so the next worker on a write path is told without having to ask.',
+      body: 'Kept as a note, with this task as where it came from, so the next task on a write path starts with it.',
       obj: 'knowledge' },
   ],
 }

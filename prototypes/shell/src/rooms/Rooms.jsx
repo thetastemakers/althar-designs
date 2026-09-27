@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import Icon from '../lib/Icon.jsx'
-import { useCompact, useKey, useDismiss } from '../lib/hooks.js'
-import { attention, execution, projects, settled } from '../data/project.js'
+import * as ui from '@charrette/ui'
+import { Room } from '@charrette/ui'
+import { useCompact, useKey } from '../lib/hooks.js'
+import { attention, defaultPlan, execution, projects, settled } from '../data/project.js'
 import TaskView from '../task/Task.jsx'
 import Knowledge from './Knowledge.jsx'
 import { taskFor } from '../task/data.js'
@@ -20,16 +21,12 @@ import './rooms.css'
    A piece of work that has a task view opens it over the whole window
    instead. The dock is a peek; the task view is where you sit. */
 
-const ROOMS = [
-  { id: 'talk',  label: 'Conversation' },
-  { id: 'board', label: 'Board' },
-  { id: 'all',   label: 'Both' },
-]
+const ROOMS = [Room.Talk, Room.Board, Room.Both]
 
 export default function Rooms() {
   const tight = useCompact(1320)   // dock floats instead of taking its own column
   const compact = useCompact(980)  // chrome sheds labels
-  const [room, setRoom] = useState('talk')          // 'talk' | 'board' | 'all'
+  const [room, setRoom] = useState(Room.Talk)
   const [dock, setDock] = useState(null)            // { kind, id }
   const [projectId, setProjectId] = useState('meridian')
   const [switcher, setSwitcher] = useState(false)
@@ -55,8 +52,8 @@ export default function Rooms() {
   const released = answered.includes('a1')
 
   /* Entering a room where the conversation is visible marks it heard. */
-  const go = (id) => { setRoom(id); if (id !== 'board') setUnread(0) }
-  const talking = room === 'talk' || room === 'all'
+  const go = (id) => { setRoom(id); if (id !== Room.Board) setUnread(0) }
+  const talking = room === Room.Talk || room === Room.Both
 
   useKey((e, typing) => {
     /* While a task has the window it owns the keyboard as well. */
@@ -65,7 +62,7 @@ export default function Rooms() {
        swallow it; plain letters still belong to whatever you are typing. */
     if (e.metaKey || e.ctrlKey) {
       const n = Number(e.key)
-      if (n >= 1 && n <= ROOMS.length) { e.preventDefault(); go(ROOMS[n - 1].id) }
+      if (n >= 1 && n <= ROOMS.length) { e.preventDefault(); go(ROOMS[n - 1]) }
       return
     }
     if (typing) { if (e.key === 'Escape') e.target.blur(); return }
@@ -73,14 +70,14 @@ export default function Rooms() {
     if (e.altKey) return
     if (e.key === 'b') {
       e.preventDefault()
-      go(ROOMS[(ROOMS.findIndex((r) => r.id === room) + 1) % ROOMS.length].id)
+      go(ROOMS[(ROOMS.indexOf(room) + 1) % ROOMS.length])
     }
     if (e.key === 'K') { e.preventDefault(); setDock(null); setLibrary(true); return }
     if (e.key === 'k') { e.preventDefault(); setDock((d) => (d?.kind === 'know' ? null : { kind: 'know' })) }
     if (e.key === 'a') { e.preventDefault(); setDock((d) => (d?.kind === 'art' ? null : { kind: 'art' })) }
     if (e.key === 'c') {
       e.preventDefault()
-      if (!talking) go('all')
+      if (!talking) go(Room.Both)
       window.setTimeout(() => composerRef.current?.focus(), 30)
     }
   }, [room, talking, task, library])
@@ -91,27 +88,40 @@ export default function Rooms() {
 
   const speak = (entries) => {
     setSaid((s) => [...s, ...entries])
-    setUnread((u) => (roomRef.current !== 'board' ? 0 : u + entries.filter((e) => e.who === 'coordinator').length))
+    setUnread((u) => (roomRef.current !== Room.Board ? 0 : u + entries.filter((e) => e.who === 'coordinator').length))
   }
+  /* Whatever you ask for comes back as a plan, once, with a short count
+     before it starts. Starting it puts it on the board. */
+  const planned = useRef(0)
   const say = (text) => {
-    const ref = String(423 + opened.length)
+    const ref = String(433 + planned.current++)
     const id = 'n' + ref
+    const title = text.split(/(?<=[.?!])\s/)[0].replace(/[.?!]$/, '').slice(0, 90)
     setSaid((s) => [...s, { id: id + '-you', who: 'you', at: 'just now', body: text }])
-    setOpened((o) => [...o, { id, ref, title: text, state: 'Scoping', worker: 'claude-opus-5', elapsed: 'just now' }])
+    /* the reply streams in, and the plan follows once it has finished */
     window.setTimeout(() => speak([{
-      id: id + '-co', who: 'coordinator', at: 'just now',
-      body: `Opened task ${ref}. I am scoping it against the project first — if it needs a decision you will get it here rather than a half-finished branch.`,
-    }, {
-      id: id + '-th', who: 'thread', ref, link: id, title: text,
-      state: 'Scoping', at: 'just now', meta: 'claude-opus-5 · 1 of 4 steps',
+      id: id + '-co', who: 'coordinator', at: 'just now', stream: true,
+      body: `Task ${ref}. I read the requirements note and the files this touches, and the project’s rules add the review steps. This is the plan; change anything before it starts.`,
+      then: [{
+        id: id + '-plan', who: 'launch', task: ref, title, branch: `ch/${ref}-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 28).replace(/-$/, '')}`,
+        estimate: 'About 30 min · on your subscriptions', steps: defaultPlan,
+      }],
     }]), 620)
   }
+  const followed = useRef(new Set())
+  const streamed = (m) => {
+    if (!m.then || followed.current.has(m.id)) return
+    followed.current.add(m.id)
+    speak(m.then)
+  }
+  const start = (t) => setOpened((o) => o.some((x) => x.ref === t.ref) ? o
+    : [...o, { id: 'n' + t.ref, ref: t.ref, title: t.title, state: t.steps[0], steps: t.steps, worker: t.lead, branch: t.branch, elapsed: 'just now' }])
 
   const record = (a, option) => {
     setAnswered((v) => [...v, a.id])
     setDock(null)
     speak([{
-      id: a.id + '-rec', who: 'coordinator', at: 'just now',
+      id: a.id + '-rec', who: 'coordinator', at: 'just now', stream: true,
       body: a.pr && option.label === 'Sent back'
         ? `Sent back to task ${a.raisedBy.split('task ')[1]} with your note. It comes back here when it is verified again.`
         : a.pr
@@ -121,6 +131,10 @@ export default function Rooms() {
         : `Recorded: ${option.label.toLowerCase()}. Project knowledge is consistent again.`,
     }])
   }
+
+  const runningCount = execution.filter((e) => e.state === 'running').length + opened.length + (released ? 1 : 0)
+  /* the first call that waits on you, from the bar; from inside a task, the task closes first */
+  const openYours = () => { setTask(null); if (room === Room.Talk) go(Room.Both); open({ kind: 'att', id: live[0]?.id }) }
 
   /* A card opens the task it stands for. Only the three tasks that have a
      view written for them get one so far; everything else still opens the
@@ -141,75 +155,51 @@ export default function Rooms() {
   }
 
   return (
-    <div className={'rm' + (dock ? ' dock-open' : '') + (dock?.kind === 'know' || dock?.kind === 'art' ? ' dock-reading' : '') + (tight || room === 'all' ? ' is-float' : '')
+    <div className={'rm' + (dock ? ' dock-open' : '') + (dock?.kind === 'know' || dock?.kind === 'art' ? ' dock-reading' : '') + (tight || room === Room.Both ? ' is-float' : '')
       + (compact ? ' is-compact' : '')}>
-      <header className="rm-chrome">
-        <div className="traffic"><i /><i /><i /></div>
-
-        <Switcher
-          project={project} projects={all} open={switcher} setOpen={setSwitcher}
-          renaming={renaming} setRenaming={setRenaming}
-          onPick={(id) => { setProjectId(id); setSwitcher(false); setDock(null); go('talk') }}
+      <ui.TitleBar
+        lights="drawn"
+        className="rm-chrome"
+        end={
+          <>
+            <ui.WorkStatus running={runningCount} yours={live.length} onYours={openYours} />
+            <ui.TitleBarRule />
+            <ui.ChromeButton icon="knowledge" label="Knowledge" compact={compact} pressed={dock?.kind === 'know'} onClick={() => open({ kind: 'know' })} title="Knowledge  k" />
+            <ui.ChromeButton icon="artifact" label="Artifacts" compact={compact} pressed={dock?.kind === 'art'} onClick={() => open({ kind: 'art' })} title="Artifacts  a" />
+          </>
+        }
+      >
+        <ui.ProjectSwitcher
+          current={summary(project)}
+          projects={all.map(summary)}
+          open={switcher}
+          onOpenChange={setSwitcher}
+          renaming={renaming}
+          onRenamingChange={setRenaming}
+          onPick={(id) => { setProjectId(id); setDock(null); go(Room.Talk) }}
           onRename={(name) => setNames((n) => ({ ...n, [project.id]: name }))}
+          onNew={() => (window.location.hash = '#new')}
         />
-        <Elsewhere projects={all.filter((p) => p.id !== project.id)}
-          onPick={(id) => { setProjectId(id); setDock(null); go('board') }}
-          onMore={() => setSwitcher(true)} />
+        <ui.Elsewhere
+          projects={all.filter((p) => p.id !== project.id).map((p) => ({ id: p.id, name: p.name, yours: p.needsYou }))}
+          onPick={(id) => { setProjectId(id); setDock(null); go(Room.Board) }}
+          onMore={() => setSwitcher(true)}
+        />
+        <ui.RoomSwitch value={room} onChange={go} news={unread > 0 && room === Room.Board} yours={live.length} />
+      </ui.TitleBar>
 
-        <nav className="rm-rooms">
-          {ROOMS.map((r, i) => (
-            <button
-              key={r.id}
-              className={'rm-room' + (room === r.id ? ' is-on' : '')}
-              onClick={() => go(r.id)}
-              title={`${r.label}  ⌘${i + 1}`}
-            >
-              {r.label}
-              {r.id === 'talk' && unread > 0 && room === 'board' && <span className="rm-room-dot" />}
-              {r.id === 'board' && live.length > 0 && <span className="rm-room-dot is-signal" />}
-            </button>
-          ))}
-        </nav>
-
-        <div className="rm-chrome-right">
-          <span className="rm-run"><span className="pulse" />
-            {execution.filter((e) => e.state === 'running').length + opened.length + (released ? 1 : 0)} running
-          </span>
-          <button
-            className={'rm-needs' + (live.length ? ' is-signal' : '')}
-            onClick={() => { if (room === 'talk') go('all'); open({ kind: 'att', id: live[0]?.id }) }}
-            disabled={!live.length}
-          >
-            {live.length ? `${live.length} need you` : 'Nothing needs you'}
-          </button>
-          <span className="rm-chrome-sep" />
-          <button
-            className={'rm-bolt' + (dock?.kind === 'know' ? ' is-on' : '')}
-            onClick={() => open({ kind: 'know' })} title="Knowledge  k"
-          >
-            <Icon name="knowledge" size={13} /><span className="rm-bolt-t">Knowledge</span>
-          </button>
-          <button
-            className={'rm-bolt' + (dock?.kind === 'art' ? ' is-on' : '')}
-            onClick={() => open({ kind: 'art' })} title="Artifacts  a"
-          >
-            <Icon name="artifact" size={13} /><span className="rm-bolt-t">Artifacts</span>
-          </button>
-        </div>
-      </header>
-
-      <main className={'rm-main' + (room === 'all' ? ' is-both' : '')} key={room}>
+      <main className={'rm-main' + (room === Room.Both ? ' is-both' : '')} key={room}>
         {talking && (
           <Talk
-            side={room === 'all'}
+            side={room === Room.Both}
             said={said} answered={answered} dock={dock}
-            onOpen={open} onSay={say}
+            onOpen={open} onSay={say} onStart={start} onStreamed={streamed}
             draft={draft} setDraft={setDraft}
             composerRef={composerRef}
             project={project} onRename={() => { setRenaming(true); setSwitcher(true) }}
           />
         )}
-        {(room === 'board' || room === 'all') && (
+        {(room === Room.Board || room === Room.Both) && (
           <Board live={live} opened={opened} released={released} dock={dock} onOpen={open} />
         )}
       </main>
@@ -219,99 +209,16 @@ export default function Rooms() {
           dock={dock} opened={opened}
           onClose={() => setDock(null)}
           onRecord={record}
-          onOpen={open}
           onLibrary={() => { setDock(null); setLibrary(true) }}
-          floating={tight || room === 'all'}
+          floating={tight || room === Room.Both}
         />
       )}
 
       {library && <Knowledge project={project.name} onClose={() => setLibrary(false)} />}
-      {task && <TaskView taskRef={task.ref} state={task.state} onClose={() => setTask(null)} />}
+      {task && <TaskView taskRef={task.ref} state={task.state} onClose={() => setTask(null)} running={runningCount} yours={live.length} onYours={openYours} />}
     </div>
   )
 }
 
-/* ---- Chrome pieces ------------------------------------------------------*/
-/* Other projects that need you, said once, in the chrome, without a
-   sidebar: the project you are in keeps the window, and the one that wants
-   you is a word away. One project by name; more than one, by count. */
-function Elsewhere({ projects: others, onPick, onMore }) {
-  const waiting = others.filter((p) => p.needsYou > 0)
-  if (!waiting.length) return null
-  if (waiting.length === 1) {
-    const p = waiting[0]
-    return (
-      <button className="rm-elsewhere" onClick={() => onPick(p.id)} title={`Go to ${p.name}`}>
-        <span className="rm-elsewhere-dot" />{p.name}<span className="rm-elsewhere-n">{p.needsYou}</span>
-      </button>
-    )
-  }
-  return (
-    <button className="rm-elsewhere" onClick={onMore}>
-      <span className="rm-elsewhere-dot" />{waiting.length} other projects
-    </button>
-  )
-}
-
-function Switcher({ project, projects: all, open, setOpen, onPick, onRename, renaming, setRenaming }) {
-  const ref = useDismiss(open, () => { setOpen(false); setRenaming(false) })
-  const [name, setName] = useState(project.name)
-  useEffect(() => { if (renaming) setName(project.name) }, [renaming, project.name])
-  const [q, setQ] = useState('')
-  const waiting = all.filter((p) => p.id !== project.id && p.needsYou > 0)
-  const rest = all.filter((p) => !waiting.includes(p) && (!q || p.name.toLowerCase().includes(q.toLowerCase())))
-  const Row = (p) => (
-    <button key={p.id} className={'rm-pop-row' + (p.id === project.id ? ' is-on' : '')} onClick={() => onPick(p.id)}>
-      <span className="rm-pop-main">
-        <span className="rm-pop-name">{p.name}</span>
-        <span className="rm-pop-desc">{p.desc}</span>
-      </span>
-      <span className="rm-pop-meta">
-        {p.needsYou > 0 && p.id !== project.id && <span className="rm-pop-needs">{p.needsYou}</span>}
-        {p.active > 0 && <span className="pulse" />}
-        <span className="rm-pop-when">{p.lastTouched}</span>
-      </span>
-    </button>
-  )
-  return (
-    <div className="rm-switch-wrap" ref={ref}>
-      <button className={'rm-switch' + (open ? ' is-open' : '')} onClick={() => { setOpen(!open); setRenaming(false); setName(project.name) }}>
-        <span className="rm-switch-name">{project.name}</span>
-        <Icon name="chevronD" size={11} className="rm-switch-caret" />
-      </button>
-      {open && (
-        <div className="rm-pop">
-          <div className="rm-pop-cur">
-            {renaming ? (
-              <form className="rm-pop-rename" onSubmit={(e) => { e.preventDefault(); if (name.trim()) onRename(name.trim()); setRenaming(false) }}>
-                <input autoFocus value={name} onChange={(e) => setName(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Escape') { e.stopPropagation(); setRenaming(false); setName(project.name) } }} />
-                <button className="rm-pop-save" type="submit">Save</button>
-              </form>
-            ) : (
-              <>
-                <span className="rm-pop-cur-t">
-                  <span className="rm-pop-cur-name">{project.name}</span>
-                  <span className="rm-pop-desc">{project.repos || project.repo}</span>
-                </span>
-                <button className="rm-pop-edit" onClick={() => setRenaming(true)} title="Rename"><Icon name="pencil" size={12} /></button>
-              </>
-            )}
-          </div>
-          {waiting.length > 0 && (
-            <>
-              <div className="rm-pop-head eyebrow">Needs you</div>
-              {waiting.map(Row)}
-            </>
-          )}
-          <div className="rm-pop-find">
-            <Icon name="search" size={12} />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Find a project" />
-          </div>
-          {rest.map(Row)}
-          <button className="rm-pop-new"><Icon name="plus" size={12} />New project</button>
-        </div>
-      )}
-    </div>
-  )
-}
+/* A project as the switcher shows it, from this prototype's data. */
+const summary = (p) => ({ id: p.id, name: p.name, about: p.desc, where: p.repos || p.repo, yours: p.needsYou, running: p.active, touched: p.lastTouched })

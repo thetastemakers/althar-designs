@@ -115,5 +115,3 @@ kbd, .kbd {
   .pulse { opacity: 0.85; }
 }
 
-/* Where a container already renders the focus state, the ring is noise. */
-.rm-composer input:focus-visible { outline: none; }

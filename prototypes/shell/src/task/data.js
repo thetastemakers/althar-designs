@@ -84,7 +84,7 @@ export const decision = {
   ],
   evidence: [
     '3 call sites affected — refunds, disputes, partial capture',
-    'No canonical knowledge covers 429 handling for write paths',
+    'No project note covers 429 handling for write paths',
     'Task 402 chose fail-fast for reads, February',
   ],
   after: 'Repair resumed with this as the reason. Written to project knowledge.',
@@ -117,12 +117,12 @@ export const choice = {
 export const offer = {
   weight: 'offer',
   title: 'None of this is written down',
-  detail: 'I worked the answer out from two canonical entries and a decision on task 402. The next worker will have to work it out again unless it is retained.',
+  detail: 'I worked the answer out from two project notes and a decision on task 402. The next task will have to work it out again unless it is kept.',
   options: [
-    { id: 'o1', label: 'Keep it as canonical', note: 'Supplied to every task touching a write path. Task 425 recorded as provenance.' },
+    { id: 'o1', label: 'Keep it as a note', note: 'Every task touching a write path starts with it. Task 425 is where it came from.' },
     { id: 'o2', label: 'Leave it', note: 'Nothing is written. The answer stays in this task only.' },
   ],
-  after: 'Written as canonical. Task 425 is its provenance.',
+  after: 'Kept as a note. Task 425 is where it came from.',
 }
 
 export const artifacts = {
@@ -197,20 +197,20 @@ export const spikes = [
 ]
 
 export const used = [
-  { id: 'u1', t: 'Session tokens rotate on privilege change', meta: 'Canonical · Architecture · 14 Jan' },
-  { id: 'u2', t: 'Middleware may not perform I/O', meta: 'Canonical · Convention · 9 Jan' },
+  { id: 'u1', t: 'Session tokens rotate on privilege change', meta: 'Note · Architecture · 14 Jan' },
+  { id: 'u2', t: 'Middleware may not perform I/O', meta: 'Note · Convention · 9 Jan' },
   { id: 'u3', t: 'Security review on changes to authentication files', meta: 'Rule · 4 Feb' },
 ]
 
 export const produced = [
-  { id: 'p1', t: 'Observed token refresh window is 5 minutes in prod', meta: 'Episodic · retained from verify',
-    flag: 'Disagrees with the canonical 15 minute entry from January.' },
-  { id: 'p2', t: 'Principal cache must be invalidated inside the rotation write', meta: 'Episodic · proposed as canonical' },
+  { id: 'p1', t: 'Observed token refresh window is 5 minutes in prod', meta: 'Seen in a task · kept from Verify',
+    flag: 'Disagrees with the 15 minute note from January.' },
+  { id: 'p2', t: 'Principal cache must be invalidated inside the rotation write', meta: 'Seen in a task · proposed as a note' },
 ]
 
 export const sessionKnowledge = [
-  { id: 'sk1', t: 'One destination is 61% of webhook throughput at peak', meta: 'Episodic · measured in the session' },
-  { id: 'sk2', t: 'Hot shards reappear within an hour of host-based sharding', meta: 'Episodic · why Shape A was discarded' },
+  { id: 'sk1', t: 'One destination is 61% of webhook throughput at peak', meta: 'Seen in a task · measured in the session' },
+  { id: 'sk2', t: 'Hot shards reappear within an hour of host-based sharding', meta: 'Seen in a task · why Shape A was dropped' },
 ]
 
 export const answerKnowledge = [
@@ -267,13 +267,47 @@ const sessionGraph = [
     what: 'Writes down what held and what did not, so the next attempt starts further on.' },
 ]
 
+/* Task 431 runs the chat workshop's thread: its steps, one review in
+   parallel, and a verify step that replaced the staging one. */
+const refundsGraph = [
+  { id: 'r1', col: 1, label: 'Triage', worker: 'claude-opus-5', took: '2m',
+    what: 'Found why refunds skip the limiter and asked you one question before writing anything.' },
+  { id: 'r2', col: 2, from: ['r1'], label: 'Implement', worker: 'claude-opus-5', took: '12m',
+    what: 'Wrapped the refund router in the partner limiter and wrote the tests.',
+    sub: [
+      { id: 'r2a', label: 'Edge cases: burst, reset', took: '6m' },
+      { id: 'r2b', label: 'API reference for 429', took: '3m' },
+    ] },
+  { id: 'r3', col: 3, from: ['r2'], label: 'Review', worker: 'claude-sonnet-5', took: '4m 20s',
+    what: 'Sonnet 5 and Gemini 3 Pro in parallel, combined. The lead fixed two findings and set one aside.' },
+  { id: 'r4', col: 4, from: ['r3'], label: 'Security review', worker: 'claude-sonnet-5', took: '4m',
+    what: 'Required by Meridian’s rule for money handling. No findings.' },
+  { id: 'r5', col: 5, from: ['r4'], label: 'Verify on fixtures', worker: 'gpt-5.2-codex', took: '31m',
+    what: 'Replaced Verify on staging after you said staging was frozen.' },
+  { id: 'r6', col: 6, from: ['r5'], label: 'Draft PR', worker: 'gpt-5.2-codex', took: '',
+    what: 'Opened as a draft by Meridian’s rule. You mark it ready.' },
+]
+
 /* ---- The three tasks ---------------------------------------------------*/
 export const tasks = [
+  {
+    id: 'refunds', label: 'Delivery', ref: '431',
+    title: 'Refunds rate-limit like charges',
+    because: 'Refunds over a partner’s limit skip rate limiting today; charges return 429 with Retry-After.',
+    worker: 'gpt-5.2-codex', branch: 'ch/431-refund-limits', chat: 'refunds',
+    graph: refundsGraph, faces: ['talk'],
+    states: {
+      running: {
+        id: 'running', chrome: 'Draft PR', elapsed: '2h 40m', cost: '$6.20', since: 'draft PR · now',
+        face: 'talk', done: ['r1', 'r2', 'r3', 'r4', 'r5'], active: 'r6',
+      },
+    },
+  },
   {
     id: 'delivery', label: 'Delivery', ref: '418',
     title: 'Repair token refresh on privilege change',
     because: 'A demoted session kept its old permissions until the token expired: the principal cache was read before the rotation hook cleared it.',
-    worker: 'claude-opus-5', branch: 'ch/418-token-refresh',
+    worker: 'claude-opus-5', branch: 'ch/418-token-refresh', chat: 'token',
     graph: deliveryGraph, faces: ['talk', 'out'],
     states: {
       running: {
