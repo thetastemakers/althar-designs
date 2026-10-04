@@ -6,7 +6,7 @@
 
 (function () {
   const WHO = {
-    coord: { name: 'Coordinator', model: 'Your choice of model', pays: 'Charrette', fam: null },
+    coord: { name: 'Coordinator', model: 'Your choice of model', pays: 'Althar', fam: null },
     codex: { name: 'Codex CLI', model: 'OpenAI', pays: 'Your ChatGPT plan', fam: 'OpenAI' },
     claude: { name: 'Claude Code', model: 'Anthropic', pays: 'Your Claude plan', fam: 'Anthropic' },
     local: { name: 'Self-hosted coder', model: 'Open-weight', pays: 'Your GPUs', fam: 'Open-weight' },

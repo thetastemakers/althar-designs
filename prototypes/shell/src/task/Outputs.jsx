@@ -43,7 +43,7 @@ function DeliveryOut({ task, st, onFull }) {
   )
 }
 
-/* The change set, as GitHub would show it and as Charrette knows it: one
+/* The change set, as GitHub would show it and as Althar knows it: one
    piece of work, as many pull requests as it has repositories, merged in
    an order and never as one. Accepting it is yours; nothing merges before. */
 function ChangeSet({ task, st, onFull }) {

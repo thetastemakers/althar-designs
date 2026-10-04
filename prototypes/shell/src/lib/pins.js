@@ -3,7 +3,7 @@ import { useSyncExternalStore } from 'react'
 /* Pinned models: the short list every picker shows first. Pins are a
    preference of yours, not of a project, so they follow you everywhere.
    (Prototype: kept in this browser.) */
-const KEY = 'charrette.pins'
+const KEY = 'althar.pins'
 const DEFAULT = ['claude-opus-5', 'gpt-5.2-codex', 'claude-sonnet-5']
 let pins = (() => {
   try { const v = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(v) ? v : DEFAULT } catch { return DEFAULT }
@@ -16,7 +16,7 @@ export const usePins = () => useSyncExternalStore((f) => { subs.add(f); return (
 
 /* Default effort per model: what a new conversation with that model starts
    at. A conversation can still turn it up or down for itself. */
-const EKEY = 'charrette.effort'
+const EKEY = 'althar.effort'
 let efforts = (() => {
   try { const v = JSON.parse(localStorage.getItem(EKEY)); return v && typeof v === 'object' ? v : {} } catch { return {} }
 })()

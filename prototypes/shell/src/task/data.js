@@ -132,7 +132,7 @@ export const artifacts = {
 
 /* What the delivery hands back: a change set. Here it spans two
    repositories, so it is two pull requests with an order between them —
-   never one atomic merge. Charrette opens each as a draft once its branch
+   never one atomic merge. Althar opens each as a draft once its branch
    has a first commit (a project setting; the default is to ask). The graph's
    own steps are the change set's checks; each PR keeps its own CI. */
 export const changeSet = {

@@ -21,7 +21,7 @@ export default function Picker({ onPick }) {
       <header className="pick-head">
         <div className="pick-mark">
           <Icon name="project" size={15} />
-          <span>Charrette</span>
+          <span>Althar</span>
         </div>
         <p className="pick-sub">
           Five structural answers to one question: if the project is the persistent

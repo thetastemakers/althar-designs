@@ -270,8 +270,8 @@
 }
 
 /* ---- The pull request ---------------------------------------------------
-   The one thing on the outputs page that leaves Charrette, so it is drawn as
-   the object it becomes: GitHub's number and branch, Charrette's checks. */
+   The one thing on the outputs page that leaves Althar, so it is drawn as
+   the object it becomes: GitHub's number and branch, Althar's checks. */
 .pr {
   margin-top: 28px; overflow: hidden;
   background: #fff; border: 1px solid var(--line-2); border-radius: 12px;
@@ -312,7 +312,7 @@
   background: var(--n-2); box-shadow: inset 0 0 0 1px var(--line);
   font: 500 11.5px/1 var(--mono); color: var(--t-2);
 }
-/* Charrette's branch in Charrette's colour, going into yours */
+/* Althar's branch in Althar's colour, going into yours */
 .pr-ref:first-child { background: var(--live-dim); box-shadow: none; color: var(--live); }
 .pr-commits { margin-left: 5px; font-size: 12px; color: var(--t-3); }
 .pr-by {

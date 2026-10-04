@@ -1,4 +1,4 @@
-/* Seed data for the Charrette shell.
+/* Seed data for the Althar shell.
    Every string here is written as operational interface language: what the
    system would actually say about itself, never what marketing would say. */
 
