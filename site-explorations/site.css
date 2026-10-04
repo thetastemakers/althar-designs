@@ -1,7 +1,7 @@
-/* Charrette — the brief.
+/* Althar — the brief.
 
    The document is paper; the product is the instrument. Prose, tables and
-   diagrams are set in ink on a warm page. Anything that shows Charrette
+   diagrams are set in ink on a warm page. Anything that shows Althar
    itself is a dark window in the product's own tokens, and inside it brass
    still means exactly one thing: work has stopped until a person answers. */
 
@@ -352,7 +352,7 @@ h3 {
 .next:hover .next-arrow { transform: translateX(4px); color: var(--ink); }
 .foot { margin-top: 56px; font-family: var(--sans); font-size: 12.5px; color: var(--ink-4); display: flex; gap: 24px; flex-wrap: wrap; }
 
-/* ---- The instrument: a Charrette window ---------------------------------- */
+/* ---- The instrument: a Althar window ---------------------------------- */
 
 .inst {
   background: var(--n-2);
@@ -638,7 +638,7 @@ h3 {
 .open h1 { max-width: 16ch; }
 .open .dek { max-width: 44ch; font-size: 22px; }
 
-/* Opening figure: agents / Charrette / yours */
+/* Opening figure: agents / Althar / yours */
 .stack { margin: 44px 0 0; display: grid; gap: 10px; }
 .stack-row { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 28px; align-items: center; }
 .stack-k { margin: 0; font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.35; }
@@ -704,7 +704,7 @@ h3 {
 .queue li:nth-child(n+4) { opacity: 0.7; }
 .queue li:nth-child(5) { opacity: 0.45; }
 
-/* Today vs with Charrette */
+/* Today vs with Althar */
 .cmp { display: grid; gap: 14px; }
 .cmp-row { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 20px; align-items: center; }
 .cmp-k { margin: 0; font-family: var(--sans); font-size: 13px; font-weight: 600; }

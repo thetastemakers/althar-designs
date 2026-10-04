@@ -38,7 +38,7 @@ export default function App() {
     <div className="app">
       <div className="protobar">
         <button className="protobar-back" onClick={() => setActive(null)}>
-          Charrette · shell explorations
+          Althar · shell explorations
         </button>
         <nav className="protobar-tabs">
           {DIRECTIONS.map((d) => (
